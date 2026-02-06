@@ -19,6 +19,23 @@ Robot::Robot(float startX, float startY, float startTheta) {
 
 
 
+void Robot::PWMtoVel(float leftPWM, float rightPWM) {
+	
+
+
+}
+
+bool Robot::CheckCollison(float &xNew, float &yNew) {
+	if (xNew == obstacle.x + obstacle.Radius || xNew == obstacle.x - obstacle.radius) {
+		return false
+			};
+	if (yNew == obstacle.y + obstacle.radius || yNew == obstacle.y - obstacle.radius) {
+		return false
+			};
+	return true;
+}
+
+
 
 // Kinematic model
 // dx/dt = velocity*cos(heading)
@@ -31,16 +48,16 @@ void Robot::KinematicUpdate() {
 	float omega = (rightVel + leftVel) / wheelDistance;
 }
 
-// This doesnt check for collision...
+
 pose Robot::UpdatePose() {
 	// Update pose.x
-	float xNew = vel * std::sin(p.theta) * dt;
-    p.x =+ xNew;
+	float xDel = vel * std::sin(p.theta) * dt;
+    float xNew =+ xDel;
     // Update pose.y
-    float yNew = vel * std::cos(p.theta) * dt;
-	p.y =+ yNew;
+    float yDel = vel * std::cos(p.theta) * dt;
+	float yNew =+ yDel;
 	// Update pose.theta
-    p.theta =+ omega * dt;
-	
+    float thetaNew =+ omega * dt;
+	// Before assigning new pose, make sure no collision?
 }
 
