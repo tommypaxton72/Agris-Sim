@@ -18,22 +18,13 @@ Robot::Robot(float startX, float startY, float startTheta) {
 
 
 
-
+// Maps 0 to max speed of robot to 0 - 255 pwm?
 void Robot::PWMtoVel(float leftPWM, float rightPWM) {
 	
 
 
 }
 
-bool Robot::CheckCollison(float &xNew, float &yNew) {
-	if (xNew == obstacle.x + obstacle.Radius || xNew == obstacle.x - obstacle.radius) {
-		return false
-			};
-	if (yNew == obstacle.y + obstacle.radius || yNew == obstacle.y - obstacle.radius) {
-		return false
-			};
-	return true;
-}
 
 
 

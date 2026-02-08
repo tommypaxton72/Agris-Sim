@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <vector>
-
+#include "robot.h"
 
 struct Obstacle {
 	float x;
