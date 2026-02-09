@@ -16,6 +16,9 @@ struct Physics
 class World {
 public:
 	World(float max_x, float max_y);
+	float worldX;
+	float worldY;
+
 	void init();
 	bool CheckCollision();
 	float worldX;
