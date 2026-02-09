@@ -1,0 +1,32 @@
+# Minimum CMake version required
+cmake_minimum_required(VERSION 3.10)
+
+# Project name and version
+project(ShapeSimulator VERSION 1.0)
+
+# Use C++17 standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+# Compiler warnings for better code quality
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+
+# Find SFML package (components: graphics, window, system)
+find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
+
+# Include directories for header files
+include_directories(${PROJECT_SOURCE_DIR}/include)
+
+# Collect all source files from src/ directory
+file(GLOB SOURCES "src/*.cpp")
+
+# Create executable from source files
+add_executable(simulator ${SOURCES})
+
+# Link SFML libraries to the executable
+target_link_libraries(simulator sfml-graphics sfml-window sfml-system)
+
+# Optional: Set output directory for the executable
+set_target_properties(simulator PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build
+)

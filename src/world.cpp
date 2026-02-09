@@ -12,22 +12,16 @@ World::World(float max_x, float max_y) : worldX(max_x), worldY(max_y) {}
 
 
 
-void AddObstacle(float x, float y, float radius) {
-	Obstacle obs;
-	obs.x = x;
-	obs.y = y;
-	obs.radius = radius;
-  obstacles.pushback(obs);
-}
+
 
 void World::CollisionDetection() {
+	if (CollisionClose)
 }
 
 
 
 
-// Need to figure out how i want to pass pose& p without it being described here?
-//
+
 
 
  
