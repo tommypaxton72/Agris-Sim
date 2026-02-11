@@ -5,44 +5,57 @@
 #include <string>
 #include <yaml-cpp/yaml.h>
 #include <cmath>
-#include <eigen> // Matrix math?
-#include "world.h" // Dont know if i want to make a seperate lib for obstacles?
+#include "controller.h"
 
 struct robo {
 	float width;
 	float length;
-	float height;
+    float maxV;
+	float wheelDistance;
+    
 };
 
 
-struct pose 
-{
+struct pose {
 	float x;
 	float y;
-	float theta;
+    float theta;
+};
+
+enum class MotorDirection {
+    FORWARD,
+    REVERSE
 };
 
 
 
 
-
-
-class Robot 
-{
-public:
-	Robot(float startX, float startY, float startTheta);
-	robo r;
-	pose p;
-	
-	void Update(float dt);
-	pose UpdatePose();
+class Robot {
+    public:
+	Robot() = default;
+    Robot(robo config, float startX, float startY, float startTheta);
+    Controller controller;
+    robo r;
+    pose p;
+	void PWMtoVel(int leftPWM, MotorDirection leftDirection, int rightPWM, MotorDirection rightDirection);
+    pose UpdatePose(float dt,
+                    int leftPWM,
+                    MotorDirection leftDirection,
+                    int rightPWM,
+                    MotorDirection rightDirection);
+	pose UpdatePose(float dt, float leftStick, float rightStick);
 	void KinematicUpdate();
+    void SetPose(const pose& inPose);
+	void SticktoVel(float leftStick, float rightStick);
+	void LoadConfig(const std::string& configPath);
 
-
-private:
-
-
-
+  private:  
+	float rightVel = 0.0f;
+	float leftVel = 0.0f;
+    float vel = 0.0f;
+    float omega = 0.0f;
+	MotorDirection leftDirection  = MotorDirection::FORWARD;
+	MotorDirection rightDirection = MotorDirection::FORWARD;
 };
 
 

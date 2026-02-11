@@ -2,8 +2,8 @@ BasedOnStyle: LLVM
 Language: Cpp
 
 # Indentation (classic K&R feel)
-IndentWidth: 2
-TabWidth: 2
+IndentWidth: 4
+TabWidth: 4
 UseTab: Never
 ContinuationIndentWidth: 4
 

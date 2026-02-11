@@ -1,0 +1,8 @@
+robot:
+  width: 5.0
+  length: 5.0
+  maxV: 10.0
+  wheelDistance: 0.3
+  startX: 20.0
+  startY: 20.0
+  startTheta: 0.0

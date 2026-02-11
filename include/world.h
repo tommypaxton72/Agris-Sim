@@ -1,31 +1,40 @@
 #ifndef WORLD_H
 #define WORLD_H
-
-
-#include <iostream>
-#include "robot.h"
 #include "obstacles.h"
+#include "robot.h"
+#include <iostream>
 
-
-struct Physics
-{
-	float friction;
+struct WorldSize {
+    float x;
+    float y;
 };
 
-	
+struct Physics {
+    float friction;
+};
+
 class World {
 public:
-	World(float max_x, float max_y);
-	float worldX;
-	float worldY;
+    World(const WorldSize& size);
+    void Update(float dt);
+    bool EdgeDetection(const pose& p);
+    bool CollisionDetection(const pose& p);
+	std::vector<Obstacle> CollisionClose(const pose& p, const Obstacles& obs, float threshold);
+    // Getters for Renderer and Logger
+    const pose& GetRobotPose() const;
+    const robo& GetRobotConfig() const;
+    const std::vector<Obstacle>& GetObstacles() const;
+    const WorldSize& GetWorldSize() const;
 
-	void init();
-	bool CheckCollision();
-	float worldX;
-	float worldY;
-	
+    // Controller config loaded through World so robot stays private
+    void LoadControllerConfig(const std::string& configPath);
+
+    static constexpr float collisionThreshold = 50.f;
 
 private:
+    WorldSize worldSize;
+    Obstacles obs;
+    Robot robot;
+    double threshold = 25;
 };
-
 #endif

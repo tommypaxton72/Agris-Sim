@@ -1,0 +1,65 @@
+* Agris Robotic Simulator
+** Description
+
+
+-----
+
+* YAML Configuration
+
+
+
+
+
+---------
+
+* Collision Detection
+** Oriented bounding box vs Circles
+ * The Robot is modeled as a a rectangle with sizing declared in the robot.yaml file. The obstacles are modeled as circles defined with radius and location declared in obstacles.yaml file.
+   
+ * Since the robots are modeled as squares with a heading it makes its much tougher than something like AABB or axis aligned bounding boxes.
+   
+ * The first step is to take the vector drawn from the (x,y) from the robot pose to the obstacles in the global reference space and transform it to the local reference frame of the robot.
+
+ * After getting the transformed vector we can then compare the radius of the obstacle being checked to the edge of the robot at the given direction.
+
+ * If a collision is detected, the simulator does not worry about collision reactions. It just prevents the new update from being stored keeping the robot at its current location.
+
+
+
+
+
+
+* Kinematics
+ * The kinematics are based on a simple differential drive system. The equations used are shown below.
+
+
+
+
+
+* Rendering
+ * Graphics are rendered using the c++ library SFML.
+
+
+
+
+
+* Inputs
+ *
+
+
+
+
+
+* Sensors
+
+
+
+-----
+
+*  To Do List
+** TODO Implement world scaling for window
+** TODO Work on kinematics
+** TODO Refactor Collision
+** TODO Implement sensor feedback
+** TODO Create compatibility layer for hardware application
+** TODO Create Logger for logging data to CSV

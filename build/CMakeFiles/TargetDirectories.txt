@@ -1,0 +1,3 @@
+/home/tommy/projects/Agris-Sim/build/CMakeFiles/AgrisSim.dir
+/home/tommy/projects/Agris-Sim/build/CMakeFiles/edit_cache.dir
+/home/tommy/projects/Agris-Sim/build/CMakeFiles/rebuild_cache.dir
