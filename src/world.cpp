@@ -6,7 +6,7 @@
 
 
 
-
+// Most of the YAML stuff is from claude. Thanks Claude.
 World::World(const WorldSize& size) : worldSize(size) {
     try {
         YAML::Node config = YAML::LoadFile("config/robot.yaml");
@@ -35,34 +35,45 @@ World::World(const WorldSize& size) : worldSize(size) {
         std::cerr << "Error parsing obstacles.yaml: " << e.what() << std::endl;
     }
 }
-
+// Might move this elsewhere
 void World::LoadControllerConfig(const std::string& configPath) {
     robot.controller.LoadConfig(configPath);
 }
 
+// Updates the world
+// Takes in Controller inputs
+// Creates new robot pose
+// Before robot pose is set it checks for collision
+// Sets Pose
 void World::Update(float dt) {
-    // Can switch this out with different inputs
+    // Can switch this out with different inputs.
     robot.controller.Update();
 
     float leftStick  = robot.controller.GetLeftStick();
     float rightStick = robot.controller.GetRightStick();
-	// Just make sure to change robot.UpdatePose() To accept correct inputs Its an overloaded function
+	// Just make sure to change robot.UpdatePose() To accept correct inputs. Its an overloaded function.
     pose testPose = robot.UpdatePose(dt, leftStick, rightStick);
+	// Before updating check if collision is false
     if (!CollisionDetection(testPose) && !EdgeDetection(testPose)) {
+		// Set pose
         robot.SetPose(testPose);
     }
 }
 
-
+// Returns true if collision with edge is detected and false if free. 
 bool World::EdgeDetection(const pose& p) {
-    
-    if (p.x <= worldSize.x && p.x >= 0 &&
-        p.y <= worldSize.y && p.y >= 0) {
+
+    if (p.x + robot.width / 2 <= worldSize.x &&
+        p.x + robot.width / 2 >= 0 &&
+        p.y + robot.width / 2 <= worldSize.y &&
+        p.y + robot.width / 2 >= 0) {
         return false;
     }
     return true;
 }
 
+// Narrow phase collision detection using local pose transformation AABB vs Circle.
+// Returns true if there is a collision and false if there isnt one.
 bool World::CollisionDetection(const pose& p) {
     
     std::vector<Obstacle> nearby = CollisionClose(p, obs, collisionThreshold);
@@ -70,11 +81,11 @@ bool World::CollisionDetection(const pose& p) {
     for (const auto& obstacle : nearby) {
 		
     }
-    return false;  // no collision
+    return false;
 }
 
-// Broad phase check - returns only obstacles within threshold distance
-// Avoids running expensive collision math on every obstacle in the scene
+// Broad phase check - returns only obstacles within robot length + obstacle radius * 2
+// But I might change this at some point?
 std::vector<Obstacle> World::CollisionClose(const pose& p, const Obstacles& obs, float threshold) {
     std::vector<Obstacle> nearby;
 
@@ -82,12 +93,9 @@ std::vector<Obstacle> World::CollisionClose(const pose& p, const Obstacles& obs,
         double dx = p.x - obs.obstacles[i].x;
         double dy = p.y - obs.obstacles[i].y;
         double distSquared = dx * dx + dy * dy;
-
-        // Compare against threshold squared to avoid costly sqrt
-        // Also account for obstacle radius so we catch obstacles
-        // whose edge is within threshold not just their center
-        float adjustedThreshold = threshold + obs.obstacles[i].radius;
-        if (distSquared <= adjustedThreshold * adjustedThreshold) {
+		// robot.length is used because I imagine length will usually be larger than width.
+		double threshold = robot.length + obs.obstacles[i]; 
+        if (distSquared <= threshold * threshold) {
             nearby.push_back(obs.obstacles[i]);
         }
     }

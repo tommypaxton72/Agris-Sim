@@ -50,7 +50,7 @@
 
 
 
-* Sensors
+* Sensors feedback
 
 
 
@@ -63,3 +63,4 @@
 ** TODO Implement sensor feedback
 ** TODO Create compatibility layer for hardware application
 ** TODO Create Logger for logging data to CSV
+** TODO Create seperate .h file for holding pose and any other useful types used around

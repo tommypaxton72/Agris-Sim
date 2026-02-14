@@ -9,17 +9,20 @@ struct WorldSize {
     float y;
 };
 
-struct Physics {
-    float friction;
-};
-
 class World {
-public:
-    World(const WorldSize& size);
+    public:
+	World(const WorldSize& size);
+
+	// Main update function for updating the world.
     void Update(float dt);
+
+	// Collision detection functions
     bool EdgeDetection(const pose& p);
     bool CollisionDetection(const pose& p);
-	std::vector<Obstacle> CollisionClose(const pose& p, const Obstacles& obs, float threshold);
+    
+    // Vector for storing all obstacles loaded from YAML file.
+    std::vector<Obstacle> CollisionClose(const pose& p, const Obstacles& obs, float threshold);
+
     // Getters for Renderer and Logger
     const pose& GetRobotPose() const;
     const robo& GetRobotConfig() const;
@@ -27,14 +30,16 @@ public:
     const WorldSize& GetWorldSize() const;
 
     // Controller config loaded through World so robot stays private
+	// I might change this later
     void LoadControllerConfig(const std::string& configPath);
 
-    static constexpr float collisionThreshold = 50.f;
-
-private:
+  private:
+	// Worldsize{x, y}
     WorldSize worldSize;
+	// Obstacles{x, y, radius}
     Obstacles obs;
+	// Robot{width, length, maxVelocity, wheelDistance}
     Robot robot;
-    double threshold = 25;
+    
 };
 #endif
