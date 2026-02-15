@@ -9,6 +9,11 @@ struct WorldSize {
     float y;
 };
 
+struct point {
+    float x;
+    float y;
+};    
+
 class World {
     public:
 	World(const WorldSize& size);

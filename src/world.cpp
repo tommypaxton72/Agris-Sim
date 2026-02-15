@@ -79,14 +79,27 @@ bool World::CollisionDetection(const pose& p) {
     std::vector<Obstacle> nearby = CollisionClose(p, obs, collisionThreshold);
     
     for (const auto& obstacle : nearby) {
-		
+		// Get vector from robot to obstacle.
+		float gDistX = p.x - obstacle.x;
+		float gDistY = p.y - obstacle.y;
+		// Transform from global frame to robots local frame.
+		point local = Transform(gDistX, gDistY, -p.theta);
+		// Find closest point on robot edge to obstacle center.
+		float closestX = Clamp(local.x, -1 * robot.width / 2, robot.width / 2);
+		float closestY = Clamp(local.y, -1 * robot.length / 2, robot.length / 2);
+		// Get distance from nearest point on robot to center of obstacle.
+		float diffX = closestX - local.x;
+		float diffY = closestY - local.y;
+		float distSquared = diffX * diffX + diffY * diffY;
+		// check if this distance is less than the radius of the circle
+		if (distSquared < obstacle.radius * obstacle.radius) return true;
     }
     return false;
 }
 
 // Broad phase check - returns only obstacles within robot length + obstacle radius * 2
 // But I might change this at some point?
-std::vector<Obstacle> World::CollisionClose(const pose& p, const Obstacles& obs, float threshold) {
+std::vector<Obstacle> World::CollisionClose(const pose& p, const Obstacles& obs) {
     std::vector<Obstacle> nearby;
 
     for (int i = 0; i < obs.obstacles.size(); i++) {
@@ -94,12 +107,29 @@ std::vector<Obstacle> World::CollisionClose(const pose& p, const Obstacles& obs,
         double dy = p.y - obs.obstacles[i].y;
         double distSquared = dx * dx + dy * dy;
 		// robot.length is used because I imagine length will usually be larger than width.
-		double threshold = robot.length + obs.obstacles[i]; 
+		double threshold = robot.length + obs.obstacles[i].radius; 
         if (distSquared <= threshold * threshold) {
             nearby.push_back(obs.obstacles[i]);
         }
     }
     return nearby;
+}
+
+// Rotation transformation
+ point World::Transform(float vecX, float vecY, float theta) {
+	 point newP;
+	 float c = std::cosf(theta);
+	 float s = std::sinf(theta);
+	 newP.x = (vecX * c) - (vecY * s);
+	 newP.y = (vecX * s) + (vecY * c);
+	 return newP;
+}
+
+// Clamp
+float Clamp(float input, float min, float max) {
+	if (input > max) return max;
+	if (input < min) return min;
+	return input;
 }
 
 // Getters
