@@ -1,4 +1,4 @@
-#include "robot.h
+#include "robot.h"
 
 
 Robot::Robot() {}
@@ -10,7 +10,7 @@ void Robot::LoadConfig() {
 
         r.width = config["robot"]["width"].as<float>();
         r.length = config["robot"]["length"].as<float>();
-        r.maxV =  = config["robot"]["MaxV"].as<float>();
+        r.maxV = config["robot"]["MaxV"].as<float>();
 		r.wheelDistance = config["robot"]["wheelDistance"].as<float>();
         
         
@@ -26,13 +26,13 @@ void Robot::LoadConfig() {
 }    
 
 // Maps 0 to max speed of robot to 0 - 255 pwm?
-void Robot::PWMtoVel(int leftPWM, MotorDirection leftDirection, int rightPWM, MotorDirection rightDirection) {
-    leftVel = (leftPWM / 255.0f) * r.maxV;
-    rightVel = (rightPWM / 255.0f) * r.maxV;
+void Robot::PWMtoVel(MotorControl lMotor, MotorControl rMotor) {
+    leftVel = (lMotor.PWM / 255.0f) * r.maxV;
+    rightVel = (rMotor.PWM / 255.0f) * r.maxV;
 	// I dont really like this setup might try and change it later.
-    if (leftDirection == MotorDirection::REVERSE)
+    if (lMotor.direction == REVERSE)
         leftVel = -leftVel;
-    if (rightDirection == MotorDirection::REVERSE)
+    if (rMotor.direction == REVERSE)
         rightVel = -rightVel;
 }
 
@@ -55,15 +55,15 @@ void Robot::KinematicUpdate() {
 }
 
 // Overloaded function for PWMtoVel
-pose Robot::UpdatePose(float dt, int leftPWM, MotorDirection leftDirection, int rightPWM, MotorDirection rightDirection) {
+pose Robot::UpdatePose(float dt, MotorControl lMotor, MotorControl rMotor) {
     pose testPose;
 
-    PWMtoVel(leftPWM, leftDirection, rightPWM, rightDirection);
+    PWMtoVel(leftMotor, rightMotor);
 
     KinematicUpdate();
 
     // Update pose.x
-    testPose.x = p.x + (vel * std::cos(p.theta) * dx);
+    testPose.x = p.x + (vel * std::cos(p.theta) * dt);
     // Update pose.y
     testPose.y = p.y + (vel * std::sin(p.theta) * dt);
 	// Update pose.theta

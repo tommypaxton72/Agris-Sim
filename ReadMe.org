@@ -56,6 +56,20 @@
 
 -----
 
+* Learning Docker
+** Notes
+ * I used this to play around with Docker containers and remote building.
+ * The build environment is on an Ubuntu 22.04 VM running docker.
+ * SFML was a pain to setup due to bugs in the most recent versions and issues with cross  compilations for windows.
+ * I want to make it where the container doesnt output all the messsy cmake generated files but rather just the .exe
+** Docker Setup
+ * Ubuntu base image.
+ * Gets tool chains required.
+ * Clone SFML and YAML-cpp.
+ * Builds both dependencies.
+ * Setups directories for the project
+
+------
 *  To Do List
 ** TODO Implement world scaling for window
 ** TODO Work on kinematics

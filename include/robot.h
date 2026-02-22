@@ -54,7 +54,7 @@ class Robot {
 
     // Changing kinematics with PWM inputs and direction    
     void PWMtoVel(MotorControl lMotor, MotorControl rMotor);
-    pose UpdatePose(MotorControl lMotor, MotorControl rMotor);
+    pose UpdatePose(float dt, MotorControl lMotor, MotorControl rMotor);
 
 	// Changing kinematics with controller inputs
 	void SticktoVel(float leftStick, float rightStick);
