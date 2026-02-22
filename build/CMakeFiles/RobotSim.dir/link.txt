@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/RobotSim.dir/src/main.cpp.o CMakeFiles/RobotSim.dir/src/world.cpp.o CMakeFiles/RobotSim.dir/src/robot.cpp.o CMakeFiles/RobotSim.dir/src/obstacles.cpp.o -o RobotSim  -lyaml-cpp 
