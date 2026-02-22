@@ -68,7 +68,7 @@ void Renderer::DrawRobot(const pose& p, const robo& r) {
     body.setOrigin(r.length / 2.0f, r.width / 2.0f);
     body.setPosition(p.x, p.y);
     
-    // SFML uses degrees, our theta is radians so convert
+    // SFML uses degrees, pose.theta is radians so convert
     body.setRotation(p.theta * (180.0f / M_PI));
     body.setFillColor(sf::Color(50, 200, 50));  // green
 
@@ -77,8 +77,7 @@ void Renderer::DrawRobot(const pose& p, const robo& r) {
     heading[0].position = sf::Vector2f(p.x, p.y);
     heading[1].position = sf::Vector2f(
         p.x + (r.length / 2.0f) * std::cos(p.theta),
-        p.y + (r.length / 2.0f) * std::sin(p.theta)
-    );
+        p.y + (r.length / 2.0f) * std::sin(p.theta));
     heading[0].color = sf::Color::White;
     heading[1].color = sf::Color::White;
 

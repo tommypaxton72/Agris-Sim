@@ -8,20 +8,10 @@
 
 // Most of the YAML stuff is from claude. Thanks Claude.
 World::World(const WorldSize& size) : worldSize(size) {
+
     try {
-        YAML::Node config = YAML::LoadFile("config/robot.yaml");
-        robo robotConfig = {
-            config["robot"]["width"].as<float>(),
-            config["robot"]["length"].as<float>(),
-            config["robot"]["maxV"].as<float>(),
-            config["robot"]["wheelDistance"].as<float>()
-        };
-        robot = Robot(robotConfig,
-            config["robot"]["startX"].as<float>(),
-            config["robot"]["startY"].as<float>(),
-            config["robot"]["startTheta"].as<float>()
-        );
-    } catch (const YAML::BadFile& e) {
+        robot.LoadConfig();
+	} catch  (const YAML::BadFile& e) {
         std::cerr << "Could not load robot.yaml: " << e.what() << std::endl;
     } catch (const YAML::Exception& e) {
         std::cerr << "Error parsing robot.yaml: " << e.what() << std::endl;
@@ -35,6 +25,7 @@ World::World(const WorldSize& size) : worldSize(size) {
         std::cerr << "Error parsing obstacles.yaml: " << e.what() << std::endl;
     }
 }
+
 // Might move this elsewhere
 void World::LoadControllerConfig(const std::string& configPath) {
     robot.controller.LoadConfig(configPath);

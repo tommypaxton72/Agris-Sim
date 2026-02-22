@@ -1,26 +1,29 @@
-#include "robot.h"
+#include "robot.h
 
 
+Robot::Robot() {}
 
 
+void Robot::LoadConfig() {
+    try {
+        YAML::Node config = YAML::LoadFile("config/robot.yaml");
 
-
-// Robot constructor takes a robo struct and starting pose
-Robot::Robot(robo config, float startX, float startY, float startTheta)
-    : r(config),  // const members initialized here in the initializer list
-      p({startX, startY, startTheta})
-{}
-
-
-
-
-
-// Same idea but for different outputs
-void Robot::SticktoVel(float leftStick, float rightStick) {
-    leftVel  = (leftStick  / 100.0f) * r.maxV;
-    rightVel = (rightStick / 100.0f) * r.maxV;
-}   
-
+        r.width = config["robot"]["width"].as<float>();
+        r.length = config["robot"]["length"].as<float>();
+        r.maxV =  = config["robot"]["MaxV"].as<float>();
+		r.wheelDistance = config["robot"]["wheelDistance"].as<float>();
+        
+        
+        p.x = config["robot"]["startX"].as<float>();
+        p.y = config["robot"]["startY"].as<float>();
+        p.theta = config["robot"]["startTheta"].as<float>();
+        
+    } catch (const YAML::BadFile& e) {
+        std::cerr << "Could not load robot.yaml: " << e.what() << std::endl;
+    } catch (const YAML::Exception& e) {
+        std::cerr << "Error parsing robot.yaml: " << e.what() << std::endl;
+    }
+}    
 
 // Maps 0 to max speed of robot to 0 - 255 pwm?
 void Robot::PWMtoVel(int leftPWM, MotorDirection leftDirection, int rightPWM, MotorDirection rightDirection) {
@@ -31,20 +34,21 @@ void Robot::PWMtoVel(int leftPWM, MotorDirection leftDirection, int rightPWM, Mo
         leftVel = -leftVel;
     if (rightDirection == MotorDirection::REVERSE)
         rightVel = -rightVel;
-
 }
 
-
+// Same idea but for different outputs
+void Robot::SticktoVel(float leftStick, float rightStick) {
+    leftVel  = (leftStick  / 100.0f) * r.maxV;
+    rightVel = (rightStick / 100.0f) * r.maxV;
+}
 
 
 // Kinematic model
 // dx/dt = velocity*cos(heading)
 // dx = velocity*cos(heading)*dt
-// integrate both sides
 // xold + xnew = velocity * cos(heading)*(dt)
+ 
 
-
-// I think something isnt right here because omega is very high when one wheel is going but slow when both are.
 void Robot::KinematicUpdate() {
 	vel = (rightVel + leftVel) / 2.0f;
 	omega = (rightVel - leftVel) / r.wheelDistance;
@@ -53,28 +57,34 @@ void Robot::KinematicUpdate() {
 // Overloaded function for PWMtoVel
 pose Robot::UpdatePose(float dt, int leftPWM, MotorDirection leftDirection, int rightPWM, MotorDirection rightDirection) {
     pose testPose;
-	PWMtoVel(leftPWM, leftDirection, rightPWM, rightDirection);
-	KinematicUpdate();
-	// Update pose.x
-	float xDel = vel * std::cos(p.theta) * dt;
-    testPose.x = p.x + xDel;
+
+    PWMtoVel(leftPWM, leftDirection, rightPWM, rightDirection);
+
+    KinematicUpdate();
+
+    // Update pose.x
+    testPose.x = p.x + (vel * std::cos(p.theta) * dx);
     // Update pose.y
-    float yDel = vel * std::sin(p.theta) * dt;
-    testPose.y = p.y + yDel;
+    testPose.y = p.y + (vel * std::sin(p.theta) * dt);
 	// Update pose.theta
-    testPose.theta = p.theta + omega * dt;
-	return testPose;
+    testPose.theta = p.theta + (omega * dt);
+
+    return testPose;
 }
 
 // Overloaded function for SticktoVel()
 pose Robot::UpdatePose(float dt, float leftStick, float rightStick) {
-    pose newPose;
+    pose testPose;
+
     SticktoVel(leftStick, rightStick);
+
     KinematicUpdate();
-    newPose.x     = p.x     + vel * std::cos(p.theta) * dt;
-    newPose.y     = p.y     + vel * std::sin(p.theta) * dt;
-    newPose.theta = p.theta + omega * dt;
-    return newPose;
+
+    testPose.x     = p.x     + vel * std::cos(p.theta) * dt;
+    testPose.y     = p.y     + vel * std::sin(p.theta) * dt;
+    testPose.theta = p.theta + omega * dt;
+
+    return testPose;
 }
 
 // Once a collision free pose is detected set pose

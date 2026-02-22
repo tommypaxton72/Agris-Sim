@@ -4,6 +4,7 @@
 #include <iostream>
 
 int main() {
+
     SimConfig config;
     try {
         YAML::Node node = YAML::LoadFile("config/sim.yaml");
@@ -24,10 +25,13 @@ int main() {
         return -1;
     }
 
+	// Set world size
     World world(config.worldSize);
+
+	// Set Window size
     Renderer renderer(config.windowWidth, config.windowHeight, config.windowTitle);
 
-    // Load controller config before the loop not after
+    
     world.LoadControllerConfig("config/sim.yaml");
 
     sf::Clock clock;

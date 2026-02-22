@@ -1,7 +1,7 @@
 #include "obstacles.h"
 
 
-
+// Manual method of adding obstacles
 void Obstacles::AddObstacle(float x, float y, float radius) {
 	Obstacle obs;
 	obs.x = x;
@@ -10,6 +10,7 @@ void Obstacles::AddObstacle(float x, float y, float radius) {
 	obstacles.push_back(obs);
 }
 
+// Load Yaml file with obstacles.
 void Obstacles::LoadConfig(const std::string& configPath) {
     YAML::Node config = YAML::LoadFile(configPath);
 

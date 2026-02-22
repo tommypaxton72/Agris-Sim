@@ -1,8 +1,10 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
+
 #include <SFML/Window.hpp>
 #include <string>
 #include <yaml-cpp/yaml.h>
+
 
 struct ControllerConfig {
     int joystickIndex;
@@ -21,7 +23,7 @@ public:
     // Call each frame to read current stick values
     void Update();
 
-    // Robot reads these to get current stick values
+    // Getter Functions for stick positions
     float GetLeftStick()  const { return leftStick; }
     float GetRightStick() const { return rightStick; }
 
@@ -33,8 +35,7 @@ private:
 
     float leftStick  = 0.0f;
     float rightStick = 0.0f;
-
-    // Apply deadzone - returns 0 if value is within deadzone range
+    
     float ApplyDeadzone(float value) const;
 };
 #endif

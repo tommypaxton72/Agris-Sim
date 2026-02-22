@@ -5,6 +5,7 @@
 #include <string>
 #include <yaml-cpp/yaml.h>
 
+// Struct for individual Obstacles.
 struct Obstacle {
 	float x;
 	float y;
@@ -14,7 +15,10 @@ struct Obstacle {
 
 class Obstacles {
 public:
-	std::vector<Obstacle> obstacles;
+	// Do we want this to be public?
+	// Vector of Obstacle
+    std::vector<Obstacle> obstacles;
+
     void AddObstacle(float x, float y, float radius);
     void LoadConfig(const std::string& configPath);
 private:

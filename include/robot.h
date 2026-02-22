@@ -7,14 +7,13 @@
 #include <cmath>
 #include "controller.h"
 
+
 struct robo {
 	float width;
 	float length;
     float maxV;
 	float wheelDistance;
-    
 };
-
 
 struct pose {
 	float x;
@@ -36,9 +35,12 @@ struct MotorControl {
 
 // Need to go through this and private anything not needed globablly.
 class Robot {
-    public:
-	Robot() = default;
-    Robot(robo config, float startX, float startY, float startTheta);
+  public:
+    Robot();
+	// Load config from YAML file
+    void LoadConfig();
+
+    //Create Controller object
     Controller controller;
 
 	// Struct for robot config
@@ -50,23 +52,19 @@ class Robot {
     MotorControl leftMotor;
 	MotorControl rightMotor;
 
-    // Methods for changing kinematics based on PWM inputs and direction    
+    // Changing kinematics with PWM inputs and direction    
     void PWMtoVel(MotorControl lMotor, MotorControl rMotor);
     pose UpdatePose(MotorControl lMotor, MotorControl rMotor);
 
-	// Changing kinematics based on controller inputs
+	// Changing kinematics with controller inputs
 	void SticktoVel(float leftStick, float rightStick);
     pose UpdatePose(float dt, float leftStick, float rightStick);
-
-    // Helper that uses global velocity values to update the kinematics
+    
 	// Based on differential drive system
     void KinematicUpdate();
 
 	// Takes in possible pose and sets it
     void SetPose(const pose& inPose);
-
-
-	void LoadConfig(const std::string& configPath);
 
   private:  
 	float rightVel = 0.0f;
