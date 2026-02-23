@@ -29,7 +29,7 @@ int main() {
     World world(config.worldSize);
 
 	// Set Window size
-    Renderer renderer(config.windowWidth, config.windowHeight, config.windowTitle);
+    Renderer renderer(config.windowWidth, config.windowHeight, config.windowTitle, config.worldSize.x, config.worldSize.y);
 
     
     world.LoadControllerConfig("config/sim.yaml");
@@ -44,4 +44,4 @@ int main() {
     }
 
     return 0;
-}
+};

@@ -1,8 +1,8 @@
 robot:
-  width: 5.0
-  length: 5.0
+  width: 16
+  length: 10.0
   maxV: 10.0
-  wheelDistance: 0.3
+  wheelDistance: 10
   startX: 20.0
   startY: 20.0
   startTheta: 0.0

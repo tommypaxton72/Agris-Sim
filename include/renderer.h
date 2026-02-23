@@ -6,7 +6,7 @@
 
 class Renderer {
 public:
-    Renderer(int windowWidth, int windowHeight, const std::string& title);
+    Renderer(int windowWidth, int windowHeight, const std::string& title, float worldW, float worldH);
     
     // Main draw call - takes const refs so renderer cant modify simulation
     void Draw(const World& world);
@@ -21,7 +21,7 @@ public:
 
 private:
     sf::RenderWindow window;
-
+	sf::View worldView;
     // Individual draw helpers
     void DrawRobot(const pose& p, const robo& r);
     void DrawObstacles(const std::vector<Obstacle>& obstacles);

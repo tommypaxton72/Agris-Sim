@@ -3,10 +3,12 @@
 
 
 // Constructor - create the window
-Renderer::Renderer(int windowWidth, int windowHeight, const std::string& title) {
+Renderer::Renderer(int windowWidth, int windowHeight, const std::string& title, float worldW, float worldH) {
     window.create(sf::VideoMode(windowWidth, windowHeight), title);
     // Limit framerate so we dont run faster than needed
     window.setFramerateLimit(60);
+    worldView = sf::View(sf::FloatRect(0, 0, worldW, worldH));
+    window.setView(worldView);
 }
 
 // Check if window is still open
@@ -26,14 +28,14 @@ void Renderer::PollEvents() {
 
 // Main draw call - clears, draws everything, displays
 void Renderer::Draw(const World& world) {
-    // Clear to dark background each frame
+    const pose& p = world.GetRobotPose();
+    worldView.setCenter(p.x, p.y);
+    window.setView(worldView);
+    
     window.clear(sf::Color(50, 50, 50));
-
     DrawWorld(world.GetWorldSize());
     DrawObstacles(world.GetObstacles());
-    DrawRobot(world.GetRobotPose(), world.GetRobotConfig());
-
-    // Show the frame
+    DrawRobot(p, world.GetRobotConfig());
     window.display();
 }
 
