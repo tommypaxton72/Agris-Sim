@@ -8,6 +8,7 @@
 #include "controller.h"
 #include "types.h"
 #include "datalayer.h"
+#include "lidar.h"
 
 // Need to go through this and private anything not needed globablly.
 class Robot {
@@ -18,7 +19,7 @@ class Robot {
 
     //Create Controller object
     Controller controller;
-	
+	Lidar lidar;
 	// Struct for robot config
     robo r;
 	// Struct for pose of robot
@@ -42,7 +43,7 @@ class Robot {
 
 
     
-  private:  
+  private:   
 	float rightVel = 0.0f;
 	float leftVel = 0.0f;
     float vel = 0.0f;

@@ -12,8 +12,8 @@ LidarData Lidar::GetScan(pose p, const std::vector<Obstacle>& obstacle) {
     float angleStep = (2.0f * M_PI) / numofRays;
 
     for (int i = 0; i < NumofRays; i++) {
-        lidarData[i].angle = i * angleStep;
-        lidarData[i].distance = CastRay(p, nearby, lidarData[i].angle);
+        Data[i].angle = i * angleStep;
+        data[i].distance = CastRay(p, nearby, data[i].angle);
     }
 	return data
 }

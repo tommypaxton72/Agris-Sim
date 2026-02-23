@@ -42,7 +42,9 @@ void World::Update(float dt) {
 
     float leftStick  = robot.controller.GetLeftStick();
     float rightStick = robot.controller.GetRightStick();
-	// Just make sure to change robot.UpdatePose() To accept correct inputs. Its an overloaded function.
+    // Just make sure to change robot.UpdatePose() To accept correct inputs. Its an overloaded function.
+    robot.lidar.GetScan(p, obs);
+	robot.RunControl(data);
     pose testPose = robot.UpdatePose(dt, leftStick, rightStick);
 	// Before updating check if collision is false
     if (!CollisionDetection(testPose) && !EdgeDetection(testPose)) {

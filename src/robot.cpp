@@ -25,7 +25,13 @@ void Robot::LoadConfig() {
     }
 }
 
-void Robot::Update(float dt);
+void Robot::UpdateSensors() {
+	lidar.GetScan();
+}
+
+void Robot::RunControl() {
+    
+}
 
 // Maps 0 to max speed of robot to 0 - 255 pwm?
 void Robot::PWMtoVel(MotorControl lMotor, MotorControl rMotor) {
