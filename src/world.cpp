@@ -54,10 +54,10 @@ void World::Update(float dt) {
 // Returns true if collision with edge is detected and false if free. 
 bool World::EdgeDetection(const pose& p) {
 
-    if (p.x + robot.width / 2 <= worldSize.x &&
-        p.x + robot.width / 2 >= 0 &&
-        p.y + robot.width / 2 <= worldSize.y &&
-        p.y + robot.width / 2 >= 0) {
+    if (p.x + robot.r.width / 2 <= worldSize.x &&
+        p.x + robot.r.width / 2 >= 0 &&
+        p.y + robot.r.width / 2 <= worldSize.y &&
+        p.y + robot.r.width / 2 >= 0) {
         return false;
     }
     return true;
@@ -67,7 +67,7 @@ bool World::EdgeDetection(const pose& p) {
 // Returns true if there is a collision and false if there isnt one.
 bool World::CollisionDetection(const pose& p) {
     
-    std::vector<Obstacle> nearby = CollisionClose(p, obs, collisionThreshold);
+    std::vector<Obstacle> nearby = CollisionClose(p, obs);
     
     for (const auto& obstacle : nearby) {
 		// Get vector from robot to obstacle.
@@ -76,8 +76,8 @@ bool World::CollisionDetection(const pose& p) {
 		// Transform from global frame to robots local frame.
 		point local = Transform(gDistX, gDistY, -p.theta);
 		// Find closest point on robot edge to obstacle center.
-		float closestX = Clamp(local.x, -1 * robot.width / 2, robot.width / 2);
-		float closestY = Clamp(local.y, -1 * robot.length / 2, robot.length / 2);
+		float closestX = Clamp(local.x, -1 * robot.r.width / 2, robot.r.width / 2);
+		float closestY = Clamp(local.y, -1 * robot.r.length / 2, robot.r.length / 2);
 		// Get distance from nearest point on robot to center of obstacle.
 		float diffX = closestX - local.x;
 		float diffY = closestY - local.y;
@@ -98,7 +98,7 @@ std::vector<Obstacle> World::CollisionClose(const pose& p, const Obstacles& obs)
         double dy = p.y - obs.obstacles[i].y;
         double distSquared = dx * dx + dy * dy;
 		// robot.length is used because I imagine length will usually be larger than width.
-		double threshold = robot.length + obs.obstacles[i].radius; 
+		double threshold = robot.r.length + obs.obstacles[i].radius; 
         if (distSquared <= threshold * threshold) {
             nearby.push_back(obs.obstacles[i]);
         }
@@ -109,15 +109,15 @@ std::vector<Obstacle> World::CollisionClose(const pose& p, const Obstacles& obs)
 // Rotation transformation
  point World::Transform(float vecX, float vecY, float theta) {
 	 point newP;
-	 float c = std::cosf(theta);
-	 float s = std::sinf(theta);
+	 float c = std::cos(theta);
+	 float s = std::sin(theta);
 	 newP.x = (vecX * c) - (vecY * s);
 	 newP.y = (vecX * s) + (vecY * c);
 	 return newP;
 }
 
 // Clamp
-float Clamp(float input, float min, float max) {
+float World::Clamp(float input, float min, float max) {
 	if (input > max) return max;
 	if (input < min) return min;
 	return input;

@@ -10,7 +10,7 @@ void Robot::LoadConfig() {
 
         r.width = config["robot"]["width"].as<float>();
         r.length = config["robot"]["length"].as<float>();
-        r.maxV = config["robot"]["MaxV"].as<float>();
+        r.maxV = config["robot"]["maxV"].as<float>();
 		r.wheelDistance = config["robot"]["wheelDistance"].as<float>();
         
         

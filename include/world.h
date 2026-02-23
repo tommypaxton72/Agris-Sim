@@ -27,7 +27,7 @@ class World {
     bool CollisionDetection(const pose& p);
     
     // Vector for storing all obstacles loaded from YAML file.
-    std::vector<Obstacle> CollisionClose(const pose& p, const Obstacles& obs, float threshold);
+    std::vector<Obstacle> CollisionClose(const pose& p, const Obstacles& obs);
 
     // Getters for Renderer and Logger
     const pose& GetRobotPose() const;
@@ -42,10 +42,13 @@ class World {
   private:
 	// Worldsize{x, y}
     WorldSize worldSize;
-	// Obstacles{x, y, radius}
+	// Obstacles class
     Obstacles obs;
-	// Robot{width, length, maxVelocity, wheelDistance}
+	// Robot class 
     Robot robot;
-    
+
+	point Transform(float vecX, float vecY, float theta);
+    float Clamp(float input, float min, float max);
+	
 };
 #endif

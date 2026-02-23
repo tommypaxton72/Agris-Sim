@@ -74,6 +74,8 @@ RUN mkdir build && cd build && \
 # fix for SFML looking at the host OS to determine build
 RUN sed -i 's/if (FIND_SFML_OS_WINDOWS)/if (TRUE)/' \
     /opt/mingw/lib/cmake/SFML/SFMLConfigDependencies.cmake
+RUN sed -i 's/set(FIND_SFML_OS_LINUX 1)/set(FIND_SFML_OS_LINUX 0)/' \
+    /opt/mingw/lib/cmake/SFML/SFMLConfigDependencies.cmake
 
 # Build location
 WORKDIR /project/build
