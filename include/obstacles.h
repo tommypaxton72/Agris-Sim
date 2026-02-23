@@ -4,14 +4,8 @@
 #include <vector>
 #include <string>
 #include <yaml-cpp/yaml.h>
+#include "types.h"
 
-// Struct for individual Obstacles.
-struct Obstacle {
-	float x;
-	float y;
-	float radius;
-	
-};
 
 class Obstacles {
 public:

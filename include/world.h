@@ -4,16 +4,8 @@
 #include "obstacles.h"
 #include "robot.h"
 #include <iostream>
-
-struct WorldSize {
-    float x;
-    float y;
-};
-
-struct point {
-    float x;
-    float y;
-};    
+#include "types.h"
+    
 
 class World {
     public:

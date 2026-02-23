@@ -23,7 +23,9 @@ void Robot::LoadConfig() {
     } catch (const YAML::Exception& e) {
         std::cerr << "Error parsing robot.yaml: " << e.what() << std::endl;
     }
-}    
+}
+
+void Robot::Update(float dt);
 
 // Maps 0 to max speed of robot to 0 - 255 pwm?
 void Robot::PWMtoVel(MotorControl lMotor, MotorControl rMotor) {

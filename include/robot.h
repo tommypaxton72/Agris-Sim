@@ -6,32 +6,8 @@
 #include <yaml-cpp/yaml.h>
 #include <cmath>
 #include "controller.h"
-
-
-struct robo {
-	float width;
-	float length;
-    float maxV;
-	float wheelDistance;
-};
-
-struct pose {
-	float x;
-	float y;
-    float theta;
-};
-
-enum MotorDirection {
-    FOWARD,
-    REVERSE
-};    
-
-struct MotorControl {
-	int PWM = 0;
-	MotorDirection direction;
-};    
-
-
+#include "types.h"
+#include "datalayer.h"
 
 // Need to go through this and private anything not needed globablly.
 class Robot {
@@ -42,16 +18,14 @@ class Robot {
 
     //Create Controller object
     Controller controller;
-
+	
 	// Struct for robot config
     robo r;
 	// Struct for pose of robot
     pose p;
 
-	// Structs for motor controller
-    MotorControl leftMotor;
-	MotorControl rightMotor;
-
+    // Struct for data passing
+    DataLayer data; 
     // Changing kinematics with PWM inputs and direction    
     void PWMtoVel(MotorControl lMotor, MotorControl rMotor);
     pose UpdatePose(float dt, MotorControl lMotor, MotorControl rMotor);
@@ -66,6 +40,8 @@ class Robot {
 	// Takes in possible pose and sets it
     void SetPose(const pose& inPose);
 
+
+    
   private:  
 	float rightVel = 0.0f;
 	float leftVel = 0.0f;
