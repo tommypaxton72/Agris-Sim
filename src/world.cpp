@@ -1,12 +1,6 @@
 #include "world.h"
 #include <yaml-cpp/yaml.h>
 
-
-
-
-
-
-// Most of the YAML stuff is from claude. Thanks Claude.
 World::World(const WorldSize& size) : worldSize(size) {
 
     try {
@@ -26,36 +20,32 @@ World::World(const WorldSize& size) : worldSize(size) {
     }
 }
 
-// Might move this elsewhere
-void World::LoadControllerConfig(const std::string& configPath) {
-    robot.controller.LoadConfig(configPath);
-}
-
 // Updates the world
 // Takes in Controller inputs
 // Creates new robot pose
 // Before robot pose is set it checks for collision
 // Sets Pose
 void World::Update(float dt) {
-    // Can switch this out with different inputs.
-    robot.controller.Update();
+    
+		// Update Sensors
+        robot.UpdateSensors(GetObstacles());
 
-    float leftStick  = robot.controller.GetLeftStick();
-    float rightStick = robot.controller.GetRightStick();
-    // Just make sure to change robot.UpdatePose() To accept correct inputs. Its an overloaded function.
-    robot.lidar.GetScan(p, obs);
-	robot.RunControl(data);
-    pose testPose = robot.UpdatePose(dt, leftStick, rightStick);
-	// Before updating check if collision is false
-    if (!CollisionDetection(testPose) && !EdgeDetection(testPose)) {
-		// Set pose
-        robot.SetPose(testPose);
-    }
-}
+        // Update Control
+        robot.UpdateControl();
+		// Check pose
+        pose testPose = robot.UpdatePose(dt);
+		// Set Pose
+        if (!CollisionDetection(testPose) && !EdgeDetection(testPose)) {
+			robot.SetPose(testPose);
+        }
+
+
+        }
+
 
 // Returns true if collision with edge is detected and false if free. 
 bool World::EdgeDetection(const pose& p) {
-
+	const robo & r = robot.GetConfig();
     if (p.x + robot.r.width / 2 <= worldSize.x &&
         p.x + robot.r.width / 2 >= 0 &&
         p.y + robot.r.width / 2 <= worldSize.y &&
@@ -70,7 +60,7 @@ bool World::EdgeDetection(const pose& p) {
 bool World::CollisionDetection(const pose& p) {
     
     std::vector<Obstacle> nearby = CollisionClose(p, obs);
-    
+    const robo r = robot.GetConfig();
     for (const auto& obstacle : nearby) {
 		// Get vector from robot to obstacle.
 		float gDistX = p.x - obstacle.x;
@@ -94,6 +84,7 @@ bool World::CollisionDetection(const pose& p) {
 // But I might change this at some point?
 std::vector<Obstacle> World::CollisionClose(const pose& p, const Obstacles& obs) {
     std::vector<Obstacle> nearby;
+	const robo r = robot.GetConfig();
 
     for (int i = 0; i < obs.obstacles.size(); i++) {
         double dx = p.x - obs.obstacles[i].x;
@@ -125,8 +116,13 @@ float World::Clamp(float input, float min, float max) {
 	return input;
 }
 
+
+
 // Getters
-const pose& World::GetRobotPose() const { return robot.p; }
-const robo& World::GetRobotConfig() const { return robot.r; }
+const pose& World::GetRobotPose() const { return robot.GetPose(); }
+const robo& World::GetRobotConfig() const { return robot.GetConfig(); }
 const std::vector<Obstacle>& World::GetObstacles() const { return obs.obstacles; }
-const WorldSize& World::GetWorldSize() const { return worldSize; }
+const WorldSize& World::GetWorldSize() const {
+    return worldSize;
+}
+const 

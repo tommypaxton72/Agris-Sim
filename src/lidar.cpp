@@ -4,18 +4,19 @@
 Lidar::Lidar(int inNumofRays, float maxDist) {
     numofRays = inNumofRays;
 	maxDistance = maxDist;
-}
+}    
 
-LidarData Lidar::GetScan(pose p, const std::vector<Obstacle>& obstacle) {
+LidarData Lidar::GetScan(const pose& p, const std::vector<Obstacle>& obstacle) {
     LidarData data;
     std::vector<Obstacle> nearby = CheckObstacles(p, obstacle);
     float angleStep = (2.0f * M_PI) / numofRays;
-
-    for (int i = 0; i < NumofRays; i++) {
-        Data[i].angle = i * angleStep;
-        data[i].distance = CastRay(p, nearby, data[i].angle);
+	
+    for (int i = 0; i < count; i++) {
+        data.points[i].angle = i * angleStep;
+        data.points[i].distance = CastRay(p, nearby, data[i].angle);
     }
-	return data
+	data.count = count;
+	return data;
 }
 
 float Lidar::CastRay(const pose& p, const std::vector<Obstacle>& obstacles, float angle) {
@@ -43,7 +44,7 @@ float Lidar::CastRay(const pose& p, const std::vector<Obstacle>& obstacles, floa
     return closest;
 }
 
-std::vector<Obstacle> Lidar::CheckObstacles(pose p, const std::vector<Obstacle>& obstacle) {
+std::vector<Obstacle> Lidar::CheckObstacles(const pose& p, const std::vector<Obstacle>& obstacle) {
 	std::vector<Obstacle> nearby;
     for (const auto& obs : obstacle) {
 		float dx = p.x - obs.x;
@@ -55,5 +56,3 @@ std::vector<Obstacle> Lidar::CheckObstacles(pose p, const std::vector<Obstacle>&
 	}
     return nearby;
 }
-
-// Need a way to get lidar data for software layer.

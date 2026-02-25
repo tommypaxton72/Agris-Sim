@@ -43,8 +43,7 @@
 
 
 
-* Inputs
- *
+* Data Layer
 
 
 
@@ -52,6 +51,12 @@
 
 * Sensors feedback
 
+
+------
+
+* Transaction layer.
+ * Had Claude setup a simple Arduino compatibility file to allow Arduino functions to work correctly.
+ * Auto control handles most of the "hardware" code. With robot passing in a DataLayer struct that holds all important values for the controlling the robot.
 
 
 -----

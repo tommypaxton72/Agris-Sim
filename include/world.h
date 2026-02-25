@@ -5,7 +5,7 @@
 #include "robot.h"
 #include <iostream>
 #include "types.h"
-    
+
 
 class World {
     public:
@@ -17,20 +17,14 @@ class World {
 	// Collision detection functions
     bool EdgeDetection(const pose& p);
     bool CollisionDetection(const pose& p);
-    
-    // Vector for storing all obstacles loaded from YAML file.
-    std::vector<Obstacle> CollisionClose(const pose& p, const Obstacles& obs);
 
+    
     // Getters for Renderer and Logger
     const pose& GetRobotPose() const;
     const robo& GetRobotConfig() const;
     const std::vector<Obstacle>& GetObstacles() const;
     const WorldSize& GetWorldSize() const;
-
-    // Controller config loaded through World so robot stays private
-	// I might change this later
-    void LoadControllerConfig(const std::string& configPath);
-
+    
   private:
 	// Worldsize{x, y}
     WorldSize worldSize;
@@ -39,6 +33,9 @@ class World {
 	// Robot class 
     Robot robot;
 
+    // Gets all close obstacles to pass to collision detection
+    std::vector<Obstacle> CollisionClose(const pose& p, const Obstacles& obs);
+    
 	point Transform(float vecX, float vecY, float theta);
     float Clamp(float input, float min, float max);
 	

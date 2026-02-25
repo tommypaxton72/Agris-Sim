@@ -1,7 +1,9 @@
 #include "robot.h"
 
 
-Robot::Robot() {}
+Robot::Robot() {
+	LoadConfig();
+}
 
 
 void Robot::LoadConfig() {
@@ -22,26 +24,27 @@ void Robot::LoadConfig() {
         std::cerr << "Could not load robot.yaml: " << e.what() << std::endl;
     } catch (const YAML::Exception& e) {
         std::cerr << "Error parsing robot.yaml: " << e.what() << std::endl;
-    }
+	}
+	controller.LoadConfig();
 }
 
-void Robot::UpdateSensors() {
-	lidar.GetScan();
+void Robot::UpdateSensors(const std::vector<Obstacle>& obstacles) {
+    dataLayer.lidarData = lidar.GetScan(p, obstacles);
 }
 
-void Robot::RunControl() {
-    
+void Robot::UpdateControl() {
+    autoControl.Update(dataLayer);
 }
+
+
 
 // Maps 0 to max speed of robot to 0 - 255 pwm?
-void Robot::PWMtoVel(MotorControl lMotor, MotorControl rMotor) {
-    leftVel = (lMotor.PWM / 255.0f) * r.maxV;
-    rightVel = (rMotor.PWM / 255.0f) * r.maxV;
+void Robot::PWMtoVel() {
+    leftVel = (dataLayer.leftMotor.PWM / 255.0f) * r.maxV;
+    rightVel = (dataLayer.rightMotor.PWM / 255.0f) * r.maxV;
 	// I dont really like this setup might try and change it later.
-    if (lMotor.direction == REVERSE)
-        leftVel = -leftVel;
-    if (rMotor.direction == REVERSE)
-        rightVel = -rightVel;
+    if (dataLayer.leftMotor.direction == REVERSE) leftVel = -leftVel;
+    if (dataLayer.rightMotor.direction == REVERSE) rightVel = -rightVel;
 }
 
 // Same idea but for different outputs
@@ -61,39 +64,36 @@ void Robot::KinematicUpdate() {
 	vel = (rightVel + leftVel) / 2.0f;
 	omega = (rightVel - leftVel) / r.wheelDistance;
 }
-
-// Overloaded function for PWMtoVel
-pose Robot::UpdatePose(float dt, MotorControl lMotor, MotorControl rMotor) {
+pose Robot::UpdatePose(float dt) {
+    controller.Update();
+    // Add something to set driveMode
+	bool buttonIsPressed = controller.GetButton();
+    if (buttonIsPressed && !buttonWasPressed) {
+        if (driveMode == Manual) {
+			driveMode = AUTO;
+		} else {
+			driveMode = MANUAL;
+		}
+	}
     pose testPose;
-
-    PWMtoVel(leftMotor, rightMotor);
-
-    KinematicUpdate();
-
+	if (driveMode == AUTO) {
+		PWMtoVel();
+    } else {
+        float lStick = controller.GetLeftStick();
+		float rStick = controller.GetRightStick();
+		SticktoVel(lStick, rStick);
+    }
+	KinematicUpdate();
     // Update pose.x
     testPose.x = p.x + (vel * std::cos(p.theta) * dt);
     // Update pose.y
     testPose.y = p.y + (vel * std::sin(p.theta) * dt);
-	// Update pose.theta
+    // Update pose.theta
     testPose.theta = p.theta + (omega * dt);
-
     return testPose;
+	
 }
 
-// Overloaded function for SticktoVel()
-pose Robot::UpdatePose(float dt, float leftStick, float rightStick) {
-    pose testPose;
-
-    SticktoVel(leftStick, rightStick);
-
-    KinematicUpdate();
-
-    testPose.x     = p.x     + vel * std::cos(p.theta) * dt;
-    testPose.y     = p.y     + vel * std::sin(p.theta) * dt;
-    testPose.theta = p.theta + omega * dt;
-
-    return testPose;
-}
 
 // Once a collision free pose is detected set pose
 void Robot::SetPose(const pose& inPose) {

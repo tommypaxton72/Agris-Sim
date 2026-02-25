@@ -26,13 +26,13 @@ public:
     // Getter Functions for stick positions
     float GetLeftStick()  const { return leftStick; }
     float GetRightStick() const { return rightStick; }
-
+	bool GetButton() const;
     // Check if controller is connected
     bool IsConnected() const;
 
 private:
     ControllerConfig config;
-
+	bool a = 0;
     float leftStick  = 0.0f;
     float rightStick = 0.0f;
     

@@ -1,6 +1,8 @@
 #ifndef SIMCONFIG_H
 #define SIMCONFIG_H
 
+#include <string>
+#include "types.h"
 
 struct SimConfig {
     int windowWidth;

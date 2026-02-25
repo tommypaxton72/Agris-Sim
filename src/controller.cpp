@@ -58,3 +58,10 @@ void Controller::Update() {
     leftStick  = ApplyDeadzone(rawLeft)  * (config.invertLeft  ? -1.0f : 1.0f);
     rightStick = ApplyDeadzone(rawRight) * (config.invertRight ? -1.0f : 1.0f);
 }
+
+bool Controller::GetButton() const {
+    return sf::joystick::isButtonPressed(config.joystickIndex, 1);
+}    
+
+float Controller::GetLeftStick() const { return leftStick; }
+float Controller::GetRightStick() const { return rightStick; }

@@ -2,36 +2,30 @@
 #define DATALAYER_H
 
 struct LidarPoint {
-    float distance;
-	float angle;
+    float distance = 0.0f;
+	float angle = 0.0f;
 };
 
 struct LidarData {
-    LidarPoint[1000];
-};
-    
-struct IMUData {
-    
+    LidarPoint points[1000];
+    int count = 0;
 };
 
-struct GPSData {
-    
-};
 
 enum MotorDirection {
-    FOWARD,
+    FORWARD,
     REVERSE
 };    
 
 struct MotorControl {
 	int PWM = 0;
-	MotorDirection direction;
+	MotorDirection direction = FORWARD;
 };
 
 struct DataLayer {
     LidarData lidarData;
     MotorControl leftMotor;
     MotorControl rightMotor;
-}    
+};
 
 #endif

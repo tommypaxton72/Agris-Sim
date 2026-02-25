@@ -9,47 +9,52 @@
 #include "types.h"
 #include "datalayer.h"
 #include "lidar.h"
+#include "autocontrol.h"
+
+
+enum DriveMode {
+    MANUAL,
+    AUTO
+};
 
 // Need to go through this and private anything not needed globablly.
 class Robot {
   public:
     Robot();
-	// Load config from YAML file
-    void LoadConfig();
 
-    //Create Controller object
-    Controller controller;
-	Lidar lidar;
+	void LoadConfig();
+
+    // Changing kinematics with PWM inputs and direction    
+    
+    
+	// Changing kinematics with controller inputs
+    
+
+    // Takes in possible pose and sets it
+    void SetPose(const pose& inPose);
+
+    void UpdateSensors(const std::vector<Obstacle>& obstacles);
+	pose UpdatePose(float dt);
+	void UpdateControl();
+
+  private:
 	// Struct for robot config
     robo r;
 	// Struct for pose of robot
     pose p;
-
-    // Struct for data passing
-    DataLayer data; 
-    // Changing kinematics with PWM inputs and direction    
-    void PWMtoVel(MotorControl lMotor, MotorControl rMotor);
-    pose UpdatePose(float dt, MotorControl lMotor, MotorControl rMotor);
-
-	// Changing kinematics with controller inputs
-	void SticktoVel(float leftStick, float rightStick);
-    pose UpdatePose(float dt, float leftStick, float rightStick);
-    
-	// Based on differential drive system
-    void KinematicUpdate();
-
-	// Takes in possible pose and sets it
-    void SetPose(const pose& inPose);
-
-
-    
-  private:   
-	float rightVel = 0.0f;
+    DataLayer dataLayer;
+	AutoControl autoControl;
+    float rightVel = 0.0f;
 	float leftVel = 0.0f;
     float vel = 0.0f;
     float omega = 0.0f;
-	
-};
+    Lidar lidar;
+    void KinematicUpdate();
+	void SticktoVel(float leftStick, float rightStick);
+    bool buttonWasPressed = 0;
+    void PWMtoVel();
+	Drivemode driveMode = MANUAL;
+    };
 
 
 #endif
