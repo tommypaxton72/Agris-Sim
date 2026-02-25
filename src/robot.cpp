@@ -8,26 +8,29 @@ Robot::Robot() : lidar(720, 20.0f) {
 void Robot::LoadConfig() {
     try {
         YAML::Node config = YAML::LoadFile("config/robot.yaml");
-
         r.width = config["robot"]["width"].as<float>();
         r.length = config["robot"]["length"].as<float>();
         r.maxV = config["robot"]["maxV"].as<float>();
-		r.wheelDistance = config["robot"]["wheelDistance"].as<float>();
-        
+        r.wheelDistance = config["robot"]["wheelDistance"].as<float>();
         
         p.x = config["robot"]["startX"].as<float>();
         p.y = config["robot"]["startY"].as<float>();
         p.theta = config["robot"]["startTheta"].as<float>();
-        
+
+        int rays   = config["robot"]["lidarRays"].as<int>();
+        float maxD = config["robot"]["lidarMaxDistance"].as<float>();
+        lidar.SetConfig(rays, maxD);
+
     } catch (const YAML::BadFile& e) {
         std::cerr << "Could not load robot.yaml: " << e.what() << std::endl;
     } catch (const YAML::Exception& e) {
         std::cerr << "Error parsing robot.yaml: " << e.what() << std::endl;
-	}
-	controller.LoadConfig("config/sim.yaml");
+    }
+    controller.LoadConfig("config/sim.yaml");
 }
 
 void Robot::UpdateSensors(const std::vector<Obstacle>& obstacles) {
+    // Pass obstacles to lidar to generate a fresh scan this frame
     dataLayer.lidarData = lidar.GetScan(p, obstacles);
 }
 

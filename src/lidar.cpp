@@ -4,7 +4,12 @@
 Lidar::Lidar(int inNumofRays, float maxDist) {
     numofRays = inNumofRays;
 	maxDistance = maxDist;
-}    
+}
+
+void Lidar::SetConfig(int rays, float maxDist) {
+    numofRays = rays;
+    maxDistance = maxDist;
+}
 
 LidarData Lidar::GetScan(const pose& p, const std::vector<Obstacle>& obstacle) {
     LidarData data;

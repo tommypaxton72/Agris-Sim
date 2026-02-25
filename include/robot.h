@@ -37,6 +37,7 @@ class Robot {
 	pose UpdatePose(float dt);
     // Getter Functions
   private:
+	Controller controller;
 	// Struct for robot config
     robo r;
 	// Struct for pose of robot

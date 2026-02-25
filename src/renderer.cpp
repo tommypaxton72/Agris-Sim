@@ -7,21 +7,59 @@ Renderer::Renderer(int windowWidth, int windowHeight, const std::string& title, 
     window.create(sf::VideoMode(windowWidth, windowHeight), title);
     window.setFramerateLimit(60);
 	showLidar = Lidar;
-    worldView = sf::View(sf::FloatRect(0, 0, worldW, worldH));
+	// Store world dimensions so UpdateView can reference them later
+    this->worldW = worldW;
+    this->worldH = worldH;
+    worldView = sf::View(sf::FloatRect(0, worldH, worldW, -worldH));
+    window.setView(worldView);
+    // Run UpdateView once at startup so initial sizing is correct
+    UpdateView(windowWidth, windowHeight);
+}
+
+void Renderer::UpdateView(unsigned int windowWidth, unsigned int windowHeight) {
+    // Calculate the aspect ratios of both the world and the current window
+    float worldRatio  = worldW / worldH;
+    float windowRatio = (float)windowWidth / (float)windowHeight;
+
+    // Viewport is in 0.0-1.0 normalized coordinates, representing
+    // what portion of the window the view occupies
+    float viewportX = 0.0f;
+    float viewportY = 0.0f;
+    float viewportW = 1.0f;
+    float viewportH = 1.0f;
+
+    if (windowRatio > worldRatio) {
+        // Window is wider than the world ratio - add side bars
+        // Scale width down so the world fits height-wise, then center it
+        viewportW = worldRatio / windowRatio;
+        viewportX = (1.0f - viewportW) / 2.0f;
+    } else {
+        // Window is taller than the world ratio - add top/bottom bars
+        // Scale height down so the world fits width-wise, then center it
+        viewportH = windowRatio / worldRatio;
+        viewportY = (1.0f - viewportH) / 2.0f;
+    }
+
+    worldView.setViewport(sf::FloatRect(viewportX, viewportY, viewportW, viewportH));
     window.setView(worldView);
 }
+
 
 // Check if window is still open
 bool Renderer::IsOpen() {
     return window.isOpen();
 }
 
-// Handle window events like clicking the close button
 void Renderer::PollEvents() {
     sf::Event event;
     while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
             window.close();
+        }
+        // SFML fires this event any time the user resizes the window
+        if (event.type == sf::Event::Resized) {
+            // Recalculate viewport so world stays correctly proportioned
+            UpdateView(event.size.width, event.size.height);
         }
     }
 }
@@ -37,7 +75,7 @@ void Renderer::Draw(const World& world) {
     DrawWorld(world.GetWorldSize());
     DrawObstacles(world.GetObstacles());
     DrawRobot(p, world.GetRobotConfig());
-	if (showLidar == false) {
+	if (showLidar == true) {
 		DrawLidar(p, world.GetLidarData());
 	}
     window.display();
@@ -68,10 +106,10 @@ void Renderer::DrawObstacles(const std::vector<Obstacle>& obstacles) {
 // Draw robot as a circle with a line showing heading
 void Renderer::DrawRobot(const pose& p, const robo& r) {
     // Create rectangle using actual robot dimensions from yaml
-    sf::RectangleShape body(sf::Vector2f(r.length, r.width));
+    sf::RectangleShape body(sf::Vector2f(r.width, r.length));
     
     // Set origin to center so rotation works correctly around robot center
-    body.setOrigin(r.length / 2.0f, r.width / 2.0f);
+    body.setOrigin(r.width / 2.0f, r.length / 2.0f);
     body.setPosition(p.x, p.y);
     
     // SFML uses degrees, pose.theta is radians so convert
@@ -92,7 +130,8 @@ void Renderer::DrawRobot(const pose& p, const robo& r) {
 }
 
 void Renderer::DrawLidar(const pose& p, const LidarData& data) {
-    for (int i = 0; i < data.count; i++) {
+	int N = 15;
+    for (int i = 0; i < data.count; i += N) {
         sf::VertexArray ray(sf::Lines, 2);
         
         // Ray starts at robot center
@@ -105,7 +144,7 @@ void Renderer::DrawLidar(const pose& p, const LidarData& data) {
         
         ray[0].color = sf::Color(255, 255, 0, 100); // yellow, semi-transparent
         ray[1].color = sf::Color(255, 255, 0, 100);
-        
+
         window.draw(ray);
     }
 }

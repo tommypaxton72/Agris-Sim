@@ -63,5 +63,4 @@ bool Controller::GetButton() const {
     return sf::Joystick::isButtonPressed(config.joystickIndex, 1);
 }    
 
-float Controller::GetLeftStick() const { return leftStick; }
-float Controller::GetRightStick() const { return rightStick; }
+

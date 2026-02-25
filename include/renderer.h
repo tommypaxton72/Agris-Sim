@@ -24,7 +24,13 @@ private:
     void DrawRobot(const pose& p, const robo& r);
     void DrawObstacles(const std::vector<Obstacle>& obstacles);
     void DrawWorld(const WorldSize& size);
-	void DrawLidar(const pose& p, const LidarData& data);
+    void DrawLidar(const pose& p, const LidarData& data);
+	// Store world dimensions so we can recalculate the view on any resize
+    float worldW = 0.0f;
+    float worldH = 0.0f;
+
+    // Called whenever window size changes to recompute letterbox viewport
+    void UpdateView(unsigned int windowW, unsigned int windowH);
 };
 
 

@@ -10,6 +10,7 @@
 class Lidar {
   public:
     Lidar(int inNumofRays, float maxDist);
+	void SetConfig(int rays, float maxDist);
 	
     LidarData GetScan(const pose& p, const std::vector<Obstacle>& obstacle);
   private:

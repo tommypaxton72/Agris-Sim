@@ -6,3 +6,5 @@ robot:
   startX: 20.0
   startY: 20.0
   startTheta: 0.0
+  lidarRays: 720
+  lidarMaxDistance: 150.0
