@@ -11,11 +11,11 @@ LidarData Lidar::GetScan(const pose& p, const std::vector<Obstacle>& obstacle) {
     std::vector<Obstacle> nearby = CheckObstacles(p, obstacle);
     float angleStep = (2.0f * M_PI) / numofRays;
 	
-    for (int i = 0; i < count; i++) {
-        data.points[i].angle = i * angleStep;
-        data.points[i].distance = CastRay(p, nearby, data[i].angle);
+    for (int i = 0; i < numofRays; i++) {
+        data.points[i].angle = p.theta + i * angleStep;
+        data.points[i].distance = CastRay(p, nearby, data.points[i].angle);
     }
-	data.count = count;
+	data.count = numofRays;
 	return data;
 }
 

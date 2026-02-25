@@ -7,7 +7,7 @@ struct Obstacle {
     float x;
     float y;
     float radius;
-};    
+};
 
 struct robo {
 	float width;

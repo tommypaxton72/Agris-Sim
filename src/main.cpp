@@ -13,10 +13,8 @@ int main() {
         config.windowTitle  = node["sim"]["windowTitle"].as<std::string>();
         config.targetFPS    = node["sim"]["targetFPS"].as<int>();
         config.dt           = node["sim"]["dt"].as<float>();
-        config.worldSize    = {
-            node["sim"]["worldX"].as<float>(),
-            node["sim"]["worldY"].as<float>()
-        };
+        config.worldSize = {node["sim"]["worldX"].as<float>(), node["sim"]["worldY"].as<float>()};
+		config.showLidar = node["sim"]["showLidar"].as<bool>();
     } catch (const YAML::BadFile& e) {
         std::cerr << "Could not load sim.yaml: " << e.what() << std::endl;
         return -1;
@@ -29,10 +27,7 @@ int main() {
     World world(config.worldSize);
 
 	// Set Window size
-    Renderer renderer(config.windowWidth, config.windowHeight, config.windowTitle, config.worldSize.x, config.worldSize.y);
-
-    
-    world.LoadControllerConfig("config/sim.yaml");
+    Renderer renderer(config.windowWidth, config.windowHeight, config.windowTitle, config.worldSize.x, config.worldSize.y, config.showLidar);
 
     sf::Clock clock;
     // Only one loop

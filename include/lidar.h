@@ -1,6 +1,7 @@
 #ifndef LIDAR_H
 #define LIDAR_H
 
+#include <vector>
 #include "types.h"
 #include "datalayer.h"
 
@@ -14,8 +15,6 @@ class Lidar {
   private:
     int numofRays = 0;
     float maxDistance = 0;
-
-    LidarData lidarData;
 
 	float CastRay(const pose& p, const std::vector<Obstacle>& obstacles, float angle);
 	std::vector<Obstacle> CheckObstacles(const pose& p, const std::vector<Obstacle>& obstacle);

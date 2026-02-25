@@ -11,7 +11,8 @@ struct SimConfig {
     int targetFPS;
     float dt;
     WorldSize worldSize;
-};
+	bool showLidar;
+    };
 
 
 

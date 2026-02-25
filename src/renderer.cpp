@@ -3,10 +3,10 @@
 
 
 // Constructor - create the window
-Renderer::Renderer(int windowWidth, int windowHeight, const std::string& title, float worldW, float worldH) {
+Renderer::Renderer(int windowWidth, int windowHeight, const std::string& title, float worldW, float worldH, bool Lidar) {
     window.create(sf::VideoMode(windowWidth, windowHeight), title);
-    // Limit framerate so we dont run faster than needed
     window.setFramerateLimit(60);
+	showLidar = Lidar;
     worldView = sf::View(sf::FloatRect(0, 0, worldW, worldH));
     window.setView(worldView);
 }
@@ -29,6 +29,7 @@ void Renderer::PollEvents() {
 // Main draw call - clears, draws everything, displays
 void Renderer::Draw(const World& world) {
     const pose& p = world.GetRobotPose();
+	
     worldView.setCenter(p.x, p.y);
     window.setView(worldView);
     
@@ -36,6 +37,9 @@ void Renderer::Draw(const World& world) {
     DrawWorld(world.GetWorldSize());
     DrawObstacles(world.GetObstacles());
     DrawRobot(p, world.GetRobotConfig());
+	if (showLidar == false) {
+		DrawLidar(p, world.GetLidarData());
+	}
     window.display();
 }
 
@@ -85,4 +89,23 @@ void Renderer::DrawRobot(const pose& p, const robo& r) {
 
     window.draw(body);
     window.draw(heading);
-}    
+}
+
+void Renderer::DrawLidar(const pose& p, const LidarData& data) {
+    for (int i = 0; i < data.count; i++) {
+        sf::VertexArray ray(sf::Lines, 2);
+        
+        // Ray starts at robot center
+        ray[0].position = sf::Vector2f(p.x, p.y);
+        
+        // Ray end point calculated from angle and distance
+        ray[1].position = sf::Vector2f(
+            p.x + data.points[i].distance * std::cos(data.points[i].angle),
+            p.y + data.points[i].distance * std::sin(data.points[i].angle));
+        
+        ray[0].color = sf::Color(255, 255, 0, 100); // yellow, semi-transparent
+        ray[1].color = sf::Color(255, 255, 0, 100);
+        
+        window.draw(ray);
+    }
+}

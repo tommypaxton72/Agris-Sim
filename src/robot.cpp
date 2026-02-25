@@ -1,8 +1,7 @@
 #include "robot.h"
 
 
-Robot::Robot() {
-	LoadConfig();
+Robot::Robot() : lidar(720, 20.0f) {
 }
 
 
@@ -25,16 +24,16 @@ void Robot::LoadConfig() {
     } catch (const YAML::Exception& e) {
         std::cerr << "Error parsing robot.yaml: " << e.what() << std::endl;
 	}
-	controller.LoadConfig();
+	controller.LoadConfig("config/sim.yaml");
 }
 
 void Robot::UpdateSensors(const std::vector<Obstacle>& obstacles) {
     dataLayer.lidarData = lidar.GetScan(p, obstacles);
 }
 
-void Robot::UpdateControl() {
-    autoControl.Update(dataLayer);
-}
+//void Robot::UpdateControl() {
+//    autoControl.Update(dataLayer);
+//}
 
 
 
@@ -69,11 +68,12 @@ pose Robot::UpdatePose(float dt) {
     // Add something to set driveMode
 	bool buttonIsPressed = controller.GetButton();
     if (buttonIsPressed && !buttonWasPressed) {
-        if (driveMode == Manual) {
+        if (driveMode == MANUAL) {
 			driveMode = AUTO;
 		} else {
 			driveMode = MANUAL;
-		}
+        }
+		buttonWasPressed = buttonIsPressed;
 	}
     pose testPose;
 	if (driveMode == AUTO) {
@@ -100,4 +100,7 @@ void Robot::SetPose(const pose& inPose) {
     p.x = inPose.x;
     p.y = inPose.y;
     p.theta = inPose.theta;
-}    
+}
+
+
+

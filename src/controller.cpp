@@ -60,7 +60,7 @@ void Controller::Update() {
 }
 
 bool Controller::GetButton() const {
-    return sf::joystick::isButtonPressed(config.joystickIndex, 1);
+    return sf::Joystick::isButtonPressed(config.joystickIndex, 1);
 }    
 
 float Controller::GetLeftStick() const { return leftStick; }

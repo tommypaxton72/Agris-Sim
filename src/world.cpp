@@ -30,8 +30,7 @@ void World::Update(float dt) {
 		// Update Sensors
         robot.UpdateSensors(GetObstacles());
 
-        // Update Control
-        robot.UpdateControl();
+        
 		// Check pose
         pose testPose = robot.UpdatePose(dt);
 		// Set Pose
@@ -45,11 +44,11 @@ void World::Update(float dt) {
 
 // Returns true if collision with edge is detected and false if free. 
 bool World::EdgeDetection(const pose& p) {
-	const robo & r = robot.GetConfig();
-    if (p.x + robot.r.width / 2 <= worldSize.x &&
-        p.x + robot.r.width / 2 >= 0 &&
-        p.y + robot.r.width / 2 <= worldSize.y &&
-        p.y + robot.r.width / 2 >= 0) {
+	const robo& r = robot.GetRobo();
+    if (p.x + r.width / 2 <= worldSize.x &&
+        p.x + r.width / 2 >= 0 &&
+        p.y + r.length / 2 <= worldSize.y &&
+        p.y + r.length / 2 >= 0) {
         return false;
     }
     return true;
@@ -59,8 +58,8 @@ bool World::EdgeDetection(const pose& p) {
 // Returns true if there is a collision and false if there isnt one.
 bool World::CollisionDetection(const pose& p) {
     
-    std::vector<Obstacle> nearby = CollisionClose(p, obs);
-    const robo r = robot.GetConfig();
+    std::vector<Obstacle> nearby = CollisionClose(p);
+    const robo r = robot.GetRobo();
     for (const auto& obstacle : nearby) {
 		// Get vector from robot to obstacle.
 		float gDistX = p.x - obstacle.x;
@@ -68,8 +67,8 @@ bool World::CollisionDetection(const pose& p) {
 		// Transform from global frame to robots local frame.
 		point local = Transform(gDistX, gDistY, -p.theta);
 		// Find closest point on robot edge to obstacle center.
-		float closestX = Clamp(local.x, -1 * robot.r.width / 2, robot.r.width / 2);
-		float closestY = Clamp(local.y, -1 * robot.r.length / 2, robot.r.length / 2);
+		float closestX = Clamp(local.x, -1 * r.width / 2, r.width / 2);
+		float closestY = Clamp(local.y, -1 * r.length / 2,r.length / 2);
 		// Get distance from nearest point on robot to center of obstacle.
 		float diffX = closestX - local.x;
 		float diffY = closestY - local.y;
@@ -82,18 +81,18 @@ bool World::CollisionDetection(const pose& p) {
 
 // Broad phase check - returns only obstacles within robot length + obstacle radius * 2
 // But I might change this at some point?
-std::vector<Obstacle> World::CollisionClose(const pose& p, const Obstacles& obs) {
-    std::vector<Obstacle> nearby;
-	const robo r = robot.GetConfig();
-
-    for (int i = 0; i < obs.obstacles.size(); i++) {
-        double dx = p.x - obs.obstacles[i].x;
-        double dy = p.y - obs.obstacles[i].y;
+std::vector<Obstacle> World::CollisionClose(const pose& p) {
+    std::vector<Obstacle> nearby; 
+	const robo& r = robot.GetRobo();
+	const std::vector<Obstacle>& o = obs.GetObstacles();
+    for (int i = 0; i < o.size(); i++) {
+        double dx = p.x - o[i].x;
+        double dy = p.y - o[i].y;
         double distSquared = dx * dx + dy * dy;
 		// robot.length is used because I imagine length will usually be larger than width.
-		double threshold = robot.r.length + obs.obstacles[i].radius; 
+		double threshold = r.length + o[i].radius; 
         if (distSquared <= threshold * threshold) {
-            nearby.push_back(obs.obstacles[i]);
+            nearby.push_back(o[i]);
         }
     }
     return nearby;
@@ -116,13 +115,15 @@ float World::Clamp(float input, float min, float max) {
 	return input;
 }
 
-
-
-// Getters
-const pose& World::GetRobotPose() const { return robot.GetPose(); }
-const robo& World::GetRobotConfig() const { return robot.GetConfig(); }
-const std::vector<Obstacle>& World::GetObstacles() const { return obs.obstacles; }
-const WorldSize& World::GetWorldSize() const {
-    return worldSize;
+void World::PrintLidarDebug() {
+    const LidarData& data = robot.GetLidarData();  // need this getter on Robot
+    
+    // Print count so we know rays are being generated
+    std::cout << "[Lidar] Count: " << data.count << "\n";
+    
+    // Print a sample of points rather than all 720 - every 90 degrees gives us 8 readings
+    for (int i = 0; i < data.count; i += data.count / 8) {
+        std::cout << "  angle: " << data.points[i].angle 
+                  << "  dist: "  << data.points[i].distance << "\n";
+    }
 }
-const 

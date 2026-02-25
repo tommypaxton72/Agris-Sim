@@ -9,14 +9,12 @@
 
 class Obstacles {
 public:
-	// Do we want this to be public?
-	// Vector of Obstacle
-    std::vector<Obstacle> obstacles;
-
+  // Getter Function
+	const std::vector<Obstacle>& GetObstacles() const { return obstacles; }
     void AddObstacle(float x, float y, float radius);
     void LoadConfig(const std::string& configPath);
 private:
-
+	std::vector<Obstacle> obstacles;
 
 
 };
