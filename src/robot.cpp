@@ -27,6 +27,9 @@ void Robot::LoadConfig() {
         std::cerr << "Error parsing robot.yaml: " << e.what() << std::endl;
     }
     controller.LoadConfig("config/sim.yaml");
+	ArduinoCompat::SetDataLayer(&dataLayer);
+	setup();
+	ArduinoCompat::SetDataLayer(nullptr);
 }
 
 void Robot::UpdateSensors(const std::vector<Obstacle>& obstacles) {
@@ -34,9 +37,21 @@ void Robot::UpdateSensors(const std::vector<Obstacle>& obstacles) {
     dataLayer.lidarData = lidar.GetScan(p, obstacles);
 }
 
-//void Robot::UpdateControl() {
-//    autoControl.Update(dataLayer);
-//}
+void Robot::UpdateControl() {
+
+    ArduinoCompat::SetDataLayer(&dataLayer);
+
+    const float msPerPoint = 100.0f / dataLayer.lidarData.count;
+    unsigned long timeStep = 0;
+    while (!dataLayer.lidarData.scanComplete) {
+        ArduinoCompat::simTimeOffset = (unsigned long)timeStep;
+        timeStep += msPerPoint;
+        loop();
+    }
+	ArduinoCompat::simTimeOffset = (unsigned long)timeStep;
+
+    ArduinoCompat::SetDataLayer(nullptr);
+}
 
 
 
@@ -70,16 +85,16 @@ pose Robot::UpdatePose(float dt) {
     controller.Update();
     // Add something to set driveMode
 	bool buttonIsPressed = controller.GetButton();
-    if (buttonIsPressed && !buttonWasPressed) {
-        if (driveMode == MANUAL) {
-			driveMode = AUTO;
-		} else {
-			driveMode = MANUAL;
-        }
-		buttonWasPressed = buttonIsPressed;
+    bool buttonJustPressed = buttonIsPressed && !buttonWasPressed;
+
+    if (buttonJustPressed) {
+        driveMode = (driveMode == MANUAL) ? AUTO : MANUAL;
+        std::cout << "[Robot] DriveMode: " << (driveMode == AUTO ? "AUTO" : "MANUAL") << "\n";
 	}
+	buttonWasPressed = buttonIsPressed;
     pose testPose;
-	if (driveMode == AUTO) {
+    if (driveMode == AUTO) {
+		UpdateControl();
 		PWMtoVel();
     } else {
         float lStick = controller.GetLeftStick();

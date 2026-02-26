@@ -5,8 +5,9 @@
 -----
 
 * YAML Configuration
-
-
+** sim.yaml
+** robot.yaml
+** obstacles.yaml
 
 
 
@@ -40,9 +41,6 @@
  * Graphics are rendered using the c++ library SFML.
 
 
-
-
-
 * Data Layer
 
 
@@ -50,14 +48,16 @@
 
 
 * Sensors feedback
-
+** Lidar
+** IMU
 
 ------
 
 * Transaction layer.
  * Had Claude setup a simple Arduino compatibility file to allow Arduino functions to work correctly.
- * Auto control handles most of the "hardware" code. With robot passing in a DataLayer struct that holds all important values for the controlling the robot.
-
+ * sketch.cpp is the hardware code with minimum changes.
+ * Robot grabs the lidar data and pushes it to sketch.cpp
+ * sketch.cpp returns the PWM values and the kinematics are calculated.
 
 -----
 
@@ -76,10 +76,9 @@
 
 ------
 *  To Do List
-** TODO Implement world scaling for window
-** TODO Work on kinematics
-** TODO Refactor Collision
-** TODO Implement sensor feedback
-** TODO Create compatibility layer for hardware application
-** TODO Create Logger for logging data to CSV
-** TODO Create seperate .h file for holding pose and any other useful types used around
+** TODO Add outputs for debugging
+** TODO Verify Data is being sent to sketch.cpp correctly.
+** TODO Change window setup
+** TODO Make a build script that runs rsync and builds the project
+** TODO Make class diagram
+** TODO Would be nice for SFML to display the PWM values being set for the wheels

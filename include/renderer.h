@@ -28,7 +28,7 @@ private:
 	// Store world dimensions so we can recalculate the view on any resize
     float worldW = 0.0f;
     float worldH = 0.0f;
-
+	void DrawRANSACLine(const pose& p, const RANSACLine& line, sf::Color color);
     // Called whenever window size changes to recompute letterbox viewport
     void UpdateView(unsigned int windowW, unsigned int windowH);
 };

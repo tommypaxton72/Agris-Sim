@@ -56,11 +56,11 @@ void Controller::Update() {
 
     // Apply deadzone then invert if configured
     leftStick  = ApplyDeadzone(rawLeft)  * (config.invertLeft  ? -1.0f : 1.0f);
-    rightStick = ApplyDeadzone(rawRight) * (config.invertRight ? -1.0f : 1.0f);
+    rightStick = ApplyDeadzone(rawRight) * (config.invertRight ? -1.0f : 1.0f);	
 }
 
 bool Controller::GetButton() const {
-    return sf::Joystick::isButtonPressed(config.joystickIndex, 1);
+    return sf::Joystick::isButtonPressed(config.joystickIndex, 0);
 }    
 
 

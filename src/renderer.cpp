@@ -77,7 +77,13 @@ void Renderer::Draw(const World& world) {
     DrawRobot(p, world.GetRobotConfig());
 	if (showLidar == true) {
 		DrawLidar(p, world.GetLidarData());
-	}
+    }
+	// Draw RANSAC lines on top of everything else so they're always visible.
+    // Green = valid line used for steering, red = invalid/not enough inliers.
+    DrawRANSACLine(p, world.GetRightLine(),
+        world.GetRightLine().valid ? sf::Color(0, 255, 0, 200) : sf::Color(255, 0, 0, 120));
+    DrawRANSACLine(p, world.GetLeftLine(),
+        world.GetLeftLine().valid  ? sf::Color(0, 255, 0, 200) : sf::Color(255, 0, 0, 120));
     window.display();
 }
 
@@ -147,4 +153,44 @@ void Renderer::DrawLidar(const pose& p, const LidarData& data) {
 
         window.draw(ray);
     }
+}
+void Renderer::DrawRANSACLine(const pose& p, const RANSACLine& line, sf::Color color) {
+    // Don't draw if RANSAC hasn't found anything yet — all zeros means no data
+    if (line.a == 0.0f && line.b == 0.0f && line.c == 0.0f) return;
+
+    // The line equation is Ax + By + C = 0 in robot-centred coordinates.
+    // To find two drawable points we pick two x values either side of the
+    // robot and solve for y: y = -(Ax + C) / B
+    // Then add the robot's world position to move from robot space to world space.
+    // We use a large span (3000mm either side) so the line extends well past
+    // the visible obstacles.
+
+    const float span = 3000.0f;
+
+    float x1 = -span;
+    float x2 =  span;
+
+    float y1, y2;
+
+    if (std::fabs(line.b) > 0.0001f) {
+        // Normal case — solve for y given x
+        y1 = -(line.a * x1 + line.c) / line.b;
+        y2 = -(line.a * x2 + line.c) / line.b;
+    } else {
+        // Line is nearly vertical — solve for x given y instead
+        // Ax + C = 0  →  x = -C/A
+        x1 = -line.c / line.a;
+        x2 = x1;
+        y1 = -span;
+        y2 =  span;
+    }
+
+    // Convert from robot-centred to world coordinates by adding robot position
+    sf::VertexArray lineShape(sf::Lines, 2);
+    lineShape[0].position = sf::Vector2f(p.x + x1, p.y + y1);
+    lineShape[1].position = sf::Vector2f(p.x + x2, p.y + y2);
+    lineShape[0].color    = color;
+    lineShape[1].color    = color;
+
+    window.draw(lineShape);
 }

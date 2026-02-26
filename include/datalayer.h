@@ -9,6 +9,7 @@ struct LidarPoint {
 struct LidarData {
     LidarPoint points[1000];
     int count = 0;
+	bool scanComplete = false;
 };
 
 
@@ -22,10 +23,19 @@ struct MotorControl {
 	MotorDirection direction = FORWARD;
 };
 
+struct RANSACLine {
+    float a     = 0.0f;
+    float b     = 0.0f;
+    float c     = 0.0f;
+    bool  valid = false;  // only draw if RANSAC found a line with enough inliers
+};
+
 struct DataLayer {
     LidarData lidarData;
     MotorControl leftMotor;
     MotorControl rightMotor;
-};
+    RANSACLine rightLine;
+	RANSACLine leftLine;
+    };
 
 #endif

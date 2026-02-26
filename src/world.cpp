@@ -29,7 +29,7 @@ void World::Update(float dt) {
     
 		// Update Sensors
         robot.UpdateSensors(GetObstacles());
-
+		
         
 		// Check pose
         pose testPose = robot.UpdatePose(dt);

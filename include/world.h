@@ -18,14 +18,17 @@ class World {
     bool EdgeDetection(const pose& p);
     bool CollisionDetection(const pose& p);
 
-    void PrintLidarDebug();
+    
     // Getters for Renderer and Logger
 // Getters
 	const pose& GetRobotPose() const { return robot.GetPose(); };
 	const robo& GetRobotConfig() const { return robot.GetRobo(); };
 	const std::vector<Obstacle>& GetObstacles() const { return obs.GetObstacles(); };
 	const WorldSize& GetWorldSize() const { return worldSize; };
-	const LidarData& GetLidarData() const { return robot.GetLidarData(); };
+    const LidarData& GetLidarData() const { return robot.GetLidarData(); };
+	const RANSACLine& GetRightLine() const { return robot.GetRightLine(); }
+    const RANSACLine& GetLeftLine() const { return robot.GetLeftLine(); }
+	void PrintLidarDebug();
   private:
 	// Worldsize{x, y}
     WorldSize worldSize;

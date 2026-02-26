@@ -9,7 +9,8 @@
 #include "types.h"
 #include "datalayer.h"
 #include "lidar.h"
-//#include "autocontrol.h"
+#include "inocompat.h"
+#include "sketch.h"
 
 
 enum DriveMode {
@@ -28,13 +29,15 @@ class Robot {
     const pose& GetPose() const { return p; };
 	const robo& GetRobo() const { return r; };
 	const LidarData& GetLidarData() const { return dataLayer.lidarData; };
-    
+	const RANSACLine& GetRightLine() const { return dataLayer.rightLine; }
+    const RANSACLine& GetLeftLine()  const { return dataLayer.leftLine; }
 
     // Takes in possible pose and sets it
     void SetPose(const pose& inPose);
 
     void UpdateSensors(const std::vector<Obstacle>& obstacles);
-	pose UpdatePose(float dt);
+	void UpdateControl();
+    pose UpdatePose(float dt);
     // Getter Functions
   private:
 	Controller controller;
@@ -51,7 +54,7 @@ class Robot {
     Lidar lidar;
     void KinematicUpdate();
 	void SticktoVel(float leftStick, float rightStick);
-    bool buttonWasPressed = 0;
+    bool buttonWasPressed = false;
     void PWMtoVel();
 	DriveMode driveMode = MANUAL;
     };
