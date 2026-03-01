@@ -14,6 +14,7 @@
 // =============================================================================
 
 #include <cstdint>
+#include "inocompat.h"
 
 struct LSM6_vector {
     int16_t x = 0;
@@ -33,7 +34,11 @@ public:
     // Here we just write a small constant into g.z so the gyro path
     // in the sketch runs rather than always seeing zero.
     void read() {
-        g.z = 0;   // small constant yaw rate — change to 0 to disable gyro effect
+		if (ArduinoCompat::g_dataLayer) {
+			g.z = (int16_t)ArduinoCompat::g_dataLayer->imu.gyroZ;
+		} else {
+			g.z = 0;
+		}
         g.x = 0;
         g.y = 0;
         a.x = 0;

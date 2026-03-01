@@ -18,7 +18,7 @@ public:
 private:
     sf::RenderWindow window;
     sf::View worldView;
-
+	sf::Font font;
 	bool showLidar = 0;
     // Individual draw helpers
     void DrawRobot(const pose& p, const robo& r);
@@ -31,7 +31,8 @@ private:
 	void DrawRANSACLine(const pose& p, const RANSACLine& line, sf::Color color);
     // Called whenever window size changes to recompute letterbox viewport
     void UpdateView(unsigned int windowW, unsigned int windowH);
-};
+	void DrawData(const DataLayer& dataLayer);
+    };
 
 
 

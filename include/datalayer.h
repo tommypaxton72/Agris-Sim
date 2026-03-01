@@ -12,6 +12,9 @@ struct LidarData {
 	bool scanComplete = false;
 };
 
+struct IMU {
+    float gyroZ = 0.0f;
+};    
 
 enum MotorDirection {
     FORWARD,
@@ -35,11 +38,15 @@ struct Debug {
     RANSACLine leftLine;
 	RANSACLine rightLine;
     float zRate;
-	float PIDResult;
+    float PIDResult;
+    float leftDistance = 0.0f;
+    float rightDistance = 0.0f;
+	int state = 0;
     };    
 
 struct DataLayer {
     LidarData lidarData;
+	IMU imu;
     MotorControl leftMotor;
     MotorControl rightMotor;
 	Debug debug;

@@ -67,8 +67,8 @@ bool World::CollisionDetection(const pose& p) {
 		// Transform from global frame to robots local frame.
 		point local = Transform(gDistX, gDistY, -p.theta);
 		// Find closest point on robot edge to obstacle center.
-		float closestX = Clamp(local.x, -1 * r.width / 2, r.width / 2);
-		float closestY = Clamp(local.y, -1 * r.length / 2,r.length / 2);
+		float closestX = Clamp(local.x, -1 * r.length / 2, r.length / 2);
+		float closestY = Clamp(local.y, -1 * r.width / 2,r.width / 2);
 		// Get distance from nearest point on robot to center of obstacle.
 		float diffX = closestX - local.x;
 		float diffY = closestY - local.y;

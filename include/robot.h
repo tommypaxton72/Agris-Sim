@@ -27,11 +27,18 @@ class Robot {
 
     // Getters
     const pose& GetPose() const { return p; };
-	const robo& GetRobo() const { return r; };
+    const robo& GetRobo() const {
+        return r;
+    };
+	const DataLayer& GetDataLayer() const { return dataLayer; };
 	const LidarData& GetLidarData() const { return dataLayer.lidarData; };
-	const RANSACLine& GetRightLine() const { return dataLayer.rightLine; }
-    const RANSACLine& GetLeftLine()  const { return dataLayer.leftLine; }
-
+	const RANSACLine& GetRightLine() const { return dataLayer.debug.rightLine; };
+    const RANSACLine& GetLeftLine()  const { return dataLayer.debug.leftLine; };
+	const MotorControl& GetLeftMotor() const { return dataLayer.leftMotor; };
+    const MotorControl& GetRightMotor() const { return dataLayer.rightMotor; };
+	const Debug& GetDebug() const { return dataLayer.debug; };
+    const float& GetLeftVel() const { return leftVel; };
+	const float& GetRightVel() const { return rightVel; };
     // Takes in possible pose and sets it
     void SetPose(const pose& inPose);
 
@@ -55,6 +62,7 @@ class Robot {
     void KinematicUpdate();
 	void SticktoVel(float leftStick, float rightStick);
     bool buttonWasPressed = false;
+	bool keyWasPressed = false;
     void PWMtoVel();
 	DriveMode driveMode = MANUAL;
     };

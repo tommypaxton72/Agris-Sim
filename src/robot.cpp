@@ -80,18 +80,27 @@ void Robot::SticktoVel(float leftStick, float rightStick) {
 void Robot::KinematicUpdate() {
 	vel = (rightVel + leftVel) / 2.0f;
 	omega = (rightVel - leftVel) / r.wheelDistance;
-}
+    if (dataLayer.leftMotor.PWM > 0 || dataLayer.rightMotor.PWM > 0) {
+        dataLayer.imu.gyroZ = (omega * (180.0f / M_PI)) / 0.070f;
+    }
+}    
 pose Robot::UpdatePose(float dt) {
     controller.Update();
-    // Add something to set driveMode
+
+    //
 	bool buttonIsPressed = controller.GetButton();
     bool buttonJustPressed = buttonIsPressed && !buttonWasPressed;
 
-    if (buttonJustPressed) {
+    bool keyIsPressed = sf::Keyboard::isKeyPressed(sf::Keyboard::Space);
+	bool keyJustPressed = keyIsPressed && !keyWasPressed;
+    
+    if (buttonJustPressed || keyJustPressed) {
         driveMode = (driveMode == MANUAL) ? AUTO : MANUAL;
         std::cout << "[Robot] DriveMode: " << (driveMode == AUTO ? "AUTO" : "MANUAL") << "\n";
 	}
-	buttonWasPressed = buttonIsPressed;
+    buttonWasPressed = buttonIsPressed;
+    keyWasPressed = keyIsPressed;
+    
     pose testPose;
     if (driveMode == AUTO) {
 		UpdateControl();

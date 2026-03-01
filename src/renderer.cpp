@@ -14,6 +14,10 @@ Renderer::Renderer(int windowWidth, int windowHeight, const std::string& title, 
     window.setView(worldView);
     // Run UpdateView once at startup so initial sizing is correct
     UpdateView(windowWidth, windowHeight);
+	if (!font.loadFromFile("JetBrainsMono-light.ttf")) {
+        std::cerr << "No font loaded!!" << std::endl;
+	}
+    
 }
 
 void Renderer::UpdateView(unsigned int windowWidth, unsigned int windowHeight) {
@@ -84,8 +88,15 @@ void Renderer::Draw(const World& world) {
         world.GetRightLine().valid ? sf::Color(0, 255, 0, 200) : sf::Color(255, 0, 0, 120));
     DrawRANSACLine(p, world.GetLeftLine(),
         world.GetLeftLine().valid  ? sf::Color(0, 255, 0, 200) : sf::Color(255, 0, 0, 120));
+
+
+	DrawData(world.GetDataLayer());
+
     window.display();
-}
+
+
+    
+    }
 
 // Draw world boundary as a rectangle outline
 void Renderer::DrawWorld(const WorldSize& size) {
@@ -93,7 +104,7 @@ void Renderer::DrawWorld(const WorldSize& size) {
     // No fill, just outline so we can see the world bounds
     boundary.setFillColor(sf::Color::Transparent);
     boundary.setOutlineColor(sf::Color::White);
-    boundary.setOutlineThickness(2.0f);
+    boundary.setOutlineThickness(-10.0f);
     window.draw(boundary);
 }
 
@@ -109,13 +120,13 @@ void Renderer::DrawObstacles(const std::vector<Obstacle>& obstacles) {
     }
 }
 
-// Draw robot as a circle with a line showing heading
+// Draw robot as a square with a line showing heading
 void Renderer::DrawRobot(const pose& p, const robo& r) {
-    // Create rectangle using actual robot dimensions from yaml
-    sf::RectangleShape body(sf::Vector2f(r.width, r.length));
+    
+    sf::RectangleShape body(sf::Vector2f(r.length, r.width));
     
     // Set origin to center so rotation works correctly around robot center
-    body.setOrigin(r.width / 2.0f, r.length / 2.0f);
+    body.setOrigin(r.length / 2.0f, r.width / 2.0f);
     body.setPosition(p.x, p.y);
     
     // SFML uses degrees, pose.theta is radians so convert
@@ -194,3 +205,104 @@ void Renderer::DrawRANSACLine(const pose& p, const RANSACLine& line, sf::Color c
 
     window.draw(lineShape);
 }
+
+// Converts state int back to a readable string for display
+static const char* StateToString(int state) {
+    switch (state) {
+        case 0: return "STOP";
+        case 1: return "INBETWEEN_ROWS";
+        case 2: return "SEARCHING_FOR_WALLS";
+        default: return "UNKNOWN";
+    }
+}
+
+void Renderer::DrawData(const DataLayer& dataLayer) {
+	window.setView(window.getDefaultView());
+
+    sf::Text leftPWM;
+    sf::Text rightPWM;
+    sf::Text leftDistance;
+	sf::Text rightDistance;
+    sf::Text lineDifference;
+    sf::Text zRate;
+	sf::Text PIDResult;
+	sf::Text state;
+
+    leftPWM.setFont(font);
+    rightPWM.setFont(font);
+	leftDistance.setFont(font);
+    rightDistance.setFont(font);
+    lineDifference.setFont(font);
+    zRate.setFont(font);
+    PIDResult.setFont(font);
+	state.setFont(font);
+
+    auto fmt = [](float v) {
+        char buf[32];
+        std::snprintf(buf, sizeof(buf), "%+.2f", v);
+        return std::string(buf);
+    };
+
+    
+	// Left Motor
+	leftPWM.setCharacterSize(16);
+    leftPWM.setFillColor(sf::Color::White);
+    leftPWM.setPosition(20.0f, 20.0f);
+    leftPWM.setString("L: " + fmt(dataLayer.leftMotor.PWM));
+
+	// Right Motor
+    rightPWM.setCharacterSize(16);
+    rightPWM.setFillColor(sf::Color::White);
+    rightPWM.setPosition(20.0f, 45.0f);
+    rightPWM.setString("R: " + fmt(dataLayer.rightMotor.PWM));
+
+    // Left Wall
+	leftDistance.setCharacterSize(16);
+    leftDistance.setFillColor(sf::Color::White);
+    leftDistance.setPosition(20.0f, 70.0f);
+    leftDistance.setString("Left Wall: " + fmt(dataLayer.debug.leftDistance));
+
+    // Right Wall
+    rightDistance.setCharacterSize(16);
+    rightDistance.setFillColor(sf::Color::White);
+    rightDistance.setPosition(20.0f, 95.0f);
+    rightDistance.setString("Right Wall: " + fmt(dataLayer.debug.rightDistance));
+    
+    // Line difference
+    lineDifference.setCharacterSize(16);
+    lineDifference.setFillColor(sf::Color::White);
+    lineDifference.setPosition(20.0f, 120.0f);
+    lineDifference.setString("Diff: " + fmt(dataLayer.debug.lineDifference));
+    
+    // zRate
+    zRate.setCharacterSize(16);
+    zRate.setFillColor(sf::Color::White);
+    zRate.setPosition(20.0f, 145.0f);
+    zRate.setString("Z: " + fmt(dataLayer.debug.zRate));
+
+    // PID Results
+    PIDResult.setCharacterSize(16);
+    PIDResult.setFillColor(sf::Color::White);
+    PIDResult.setPosition(20.0f, 170.0f);
+    PIDResult.setString("PID: " + fmt(dataLayer.debug.PIDResult));
+
+    // Current state
+    state.setCharacterSize(16);
+    state.setFillColor(sf::Color::Blue);
+	state.setPosition(20.0f, 195.0f);
+	state.setString("State: " + std::string(StateToString(dataLayer.debug.state)));   
+    
+    
+    window.draw(leftPWM);
+    window.draw(rightPWM);
+    window.draw(leftDistance);
+	window.draw(rightDistance);
+    window.draw(lineDifference);
+    window.draw(zRate);
+    window.draw(PIDResult);
+	window.draw(state);
+    
+	window.setView(worldView);
+}
+
+

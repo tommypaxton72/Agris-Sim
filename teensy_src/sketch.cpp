@@ -176,13 +176,15 @@ void loop() {
                 // Calculate distance from origin (the car) to the RANSAC lines
                 ransacRight.distancetoLine();
                 rightDistance = ransacRight.distance;
-
+				
                 ransacLeft.distancetoLine();
                 leftDistance = ransacLeft.distance;
 
                 // Calculation for finding the distance between RANSAC lines. Use this for PID as an error to correct.
                 lineDifference = rightDistance - leftDistance;
-				if (ArduinoCompat::g_dataLayer) {
+                if (ArduinoCompat::g_dataLayer) {
+                    ArduinoCompat::g_dataLayer->debug.leftDistance = leftDistance;
+					ArduinoCompat::g_dataLayer->debug.rightDistance = rightDistance;
                     ArduinoCompat::g_dataLayer->debug.rightLine = {
                         ransacRight.bestLine.a,
                         ransacRight.bestLine.b,
@@ -232,8 +234,10 @@ void loop() {
 				if (ArduinoCompat::g_dataLayer) {
                     ArduinoCompat::g_dataLayer->debug.lineDifference = lineDifference;
                     ArduinoCompat::g_dataLayer->debug.zRate = zRateDegreesPerSecond;
-					ArduinoCompat::g_dataLayer->debug.PIDResult = s.GetPIDResult();
-				}
+                    ArduinoCompat::g_dataLayer->debug.PIDResult = S.GetPIDResult();
+					ArduinoCompat::g_dataLayer->debug.state = (int)S.STATE;
+                    }
+                
                 if (rightOk && leftOk) {
                     // Both walls visible — use the signed difference to centre between them
                     timeSinceValidation = 0;
