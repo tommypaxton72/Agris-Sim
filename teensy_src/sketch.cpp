@@ -183,13 +183,13 @@ void loop() {
                 // Calculation for finding the distance between RANSAC lines. Use this for PID as an error to correct.
                 lineDifference = rightDistance - leftDistance;
 				if (ArduinoCompat::g_dataLayer) {
-                    ArduinoCompat::g_dataLayer->rightLine = {
+                    ArduinoCompat::g_dataLayer->debug.rightLine = {
                         ransacRight.bestLine.a,
                         ransacRight.bestLine.b,
                         ransacRight.bestLine.c,
                         ransacRight.lineValidation()
                     };
-                    ArduinoCompat::g_dataLayer->leftLine = {
+                    ArduinoCompat::g_dataLayer->debug.leftLine = {
                         ransacLeft.bestLine.a,
                         ransacLeft.bestLine.b,
                         ransacLeft.bestLine.c,
@@ -228,6 +228,12 @@ void loop() {
             case S.INBETWEEN_ROWS:
                 // Four possible wall visibility states — each has its own steering input
 
+                // ============= Print Line difference here ==============
+				if (ArduinoCompat::g_dataLayer) {
+                    ArduinoCompat::g_dataLayer->debug.lineDifference = lineDifference;
+                    ArduinoCompat::g_dataLayer->debug.zRate = zRateDegreesPerSecond;
+					ArduinoCompat::g_dataLayer->debug.PIDResult = s.GetPIDResult();
+				}
                 if (rightOk && leftOk) {
                     // Both walls visible — use the signed difference to centre between them
                     timeSinceValidation = 0;

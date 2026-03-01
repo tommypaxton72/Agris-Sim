@@ -20,6 +20,7 @@ class StateMachine {
 
     RANSAC ransac;
 
+	const float& GetPIDResult() const { return pidResult; };
   private:
   //Tuning Variables
     const float Kp = 2; //0.35

@@ -30,12 +30,19 @@ struct RANSACLine {
     bool  valid = false;  // only draw if RANSAC found a line with enough inliers
 };
 
+struct Debug {
+    float lineDifference;
+    RANSACLine leftLine;
+	RANSACLine rightLine;
+    float zRate;
+	float PIDResult;
+    };    
+
 struct DataLayer {
     LidarData lidarData;
     MotorControl leftMotor;
     MotorControl rightMotor;
-    RANSACLine rightLine;
-	RANSACLine leftLine;
+	Debug debug;
     };
 
 #endif

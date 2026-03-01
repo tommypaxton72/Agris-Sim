@@ -48,8 +48,10 @@ class RANSAC {
 
     int bestInlierCount = 0;
     float distance = 0.0f;
+	// Are these worth displaying?
     float headingError = 0.0f;
     float distanceError = 0.0f;
+
     plane bestLine = {0.0f, 0.0f, 0.0f};
   
   private:

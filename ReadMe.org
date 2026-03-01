@@ -42,7 +42,12 @@
 
 
 * Data Layer
-
+** Debug
+ * Line difference
+ * PID results
+ * RANSAC Lines
+ * PWM values
+ * ?
 
 
 
