@@ -138,10 +138,10 @@ void loop() {
 		//Checks if detect angles are within a certain thresh-hold.
         //45 -> 135 degrees is right side
         //225 -> 315 is left side.
-        if (m.angle > 45.0f && m.angle <= 135.0f) {
+        if (m.angle > 225.0f && m.angle <= 315.0f) {
             rightSideAngles.push_back(m.angle);
             rightSideDistances.push_back(m.distance);
-        } else if (m.angle > 225.0f && m.angle <= 315.0f) {
+        } else if (m.angle > 45.0f && m.angle <= 135.0f) {
             leftSideAngles.push_back(m.angle);
             leftSideDistances.push_back(m.distance);
         }
@@ -175,9 +175,11 @@ void loop() {
 
                 // Calculate distance from origin (the car) to the RANSAC lines
                 ransacRight.distancetoLine();
+				ransacRight.headingAngle(0); // TP
                 rightDistance = ransacRight.distance;
-				
+
                 ransacLeft.distancetoLine();
+				ransacLeft.headingAngle(0); // TP
                 leftDistance = ransacLeft.distance;
 
                 // Calculation for finding the distance between RANSAC lines. Use this for PID as an error to correct.

@@ -34,11 +34,11 @@ struct RANSACLine {
 };
 
 struct Debug {
-    float lineDifference;
+    float lineDifference = 0.0f;
     RANSACLine leftLine;
 	RANSACLine rightLine;
-    float zRate;
-    float PIDResult;
+    float zRate = 0.0f;
+    float PIDResult = 0.0f;
     float leftDistance = 0.0f;
     float rightDistance = 0.0f;
 	int state = 0;

@@ -41,14 +41,10 @@ void Robot::UpdateControl() {
 
     ArduinoCompat::SetDataLayer(&dataLayer);
 
-    const float msPerPoint = 100.0f / dataLayer.lidarData.count;
-    unsigned long timeStep = 0;
+
     while (!dataLayer.lidarData.scanComplete) {
-        ArduinoCompat::simTimeOffset = (unsigned long)timeStep;
-        timeStep += msPerPoint;
         loop();
     }
-	ArduinoCompat::simTimeOffset = (unsigned long)timeStep;
 
     ArduinoCompat::SetDataLayer(nullptr);
 }

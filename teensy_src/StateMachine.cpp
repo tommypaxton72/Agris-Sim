@@ -19,9 +19,9 @@ void StateMachine::stop(){
   We want to keep it at 0, which means that both sides are even, which is what 'desiredState' is.
 */
 void StateMachine::PID(float sideDifference, float gyro){
-  float headingCorrection = ransac.bestLine.a * 10.0f;
+  //TP float headingCorrection = ransac.bestLine.a * 10.0f;
 
-  float error = (desiredState - sideDifference) + headingCorrection;
+  float error = (desiredState - sideDifference); //TP + headingCorrection;
 
 //Kp*e(t)
   double proportional = Kp * error;

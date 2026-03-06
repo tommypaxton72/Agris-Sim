@@ -5,12 +5,12 @@
 #include "robot.h"
 #include <iostream>
 #include "types.h"
-
+#include "logger.h"
 
 class World {
     public:
 	World(const WorldSize& size);
-
+	~World();
 	// Main update function for updating the world.
     void Update(float dt);
 	
@@ -19,8 +19,7 @@ class World {
     bool CollisionDetection(const pose& p);
 
     
-    // Getters for Renderer and Logger
-// Getters
+	// Getters
 	const pose& GetRobotPose() const { return robot.GetPose(); };
 	const robo& GetRobotConfig() const { return robot.GetRobo(); };
 	const std::vector<Obstacle>& GetObstacles() const { return obs.GetObstacles(); };
@@ -44,6 +43,8 @@ class World {
     Obstacles obs;
 	// Robot class 
     Robot robot;
+	// Logger class
+    Logger logger;
 
     // Gets all close obstacles to pass to collision detection
     std::vector<Obstacle> CollisionClose(const pose& p);

@@ -70,10 +70,10 @@
 	// ---------------------------------------------------------------------------
 	inline unsigned long millis() {
     static auto start = std::chrono::steady_clock::now();
-    unsigned long real = (unsigned long)std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::steady_clock::now() - start).count();
-    return real + ArduinoCompat::simTimeOffset;
-	}
+    return (unsigned long)std::chrono::duration_cast<std::chrono::milliseconds>(
+		std::chrono::steady_clock::now() - start)
+        .count();
+    }
 	
 	inline unsigned long micros() {
 	    static auto start = std::chrono::steady_clock::now();

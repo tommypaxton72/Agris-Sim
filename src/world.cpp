@@ -18,7 +18,13 @@ World::World(const WorldSize& size) : worldSize(size) {
     } catch (const YAML::Exception& e) {
         std::cerr << "Error parsing obstacles.yaml: " << e.what() << std::endl;
     }
+	logger.OpenFile("log.csv");
 }
+
+World::~World() {
+    logger.Close();
+}    
+
 
 // Updates the world
 // Takes in Controller inputs
@@ -27,19 +33,18 @@ World::World(const WorldSize& size) : worldSize(size) {
 // Sets Pose
 void World::Update(float dt) {
     
-		// Update Sensors
-        robot.UpdateSensors(GetObstacles());
-		
+	// Update Sensors
+    robot.UpdateSensors(GetObstacles());
+    
+	// Check pose
+	pose testPose = robot.UpdatePose(dt);
+	// Set Pose
+	if (!CollisionDetection(testPose) && !EdgeDetection(testPose)) {
+		robot.SetPose(testPose);
+	}
         
-		// Check pose
-        pose testPose = robot.UpdatePose(dt);
-		// Set Pose
-        if (!CollisionDetection(testPose) && !EdgeDetection(testPose)) {
-			robot.SetPose(testPose);
-        }
-
-
-        }
+	logger.LogData(robot.GetPose(), robot.GetDataLayer());
+}
 
 
 // Returns true if collision with edge is detected and false if free. 

@@ -18,12 +18,12 @@ class StateMachine {
     //Proportional Integral Derivative
     void PID(float sideDifference, float gyro);
 
-    RANSAC ransac;
+    //TP RANSAC ransac;
 
 	const float& GetPIDResult() const { return pidResult; };
   private:
   //Tuning Variables
-    const float Kp = 2; //0.35
+    const float Kp = .35; //0.35
     const float Ki = 0.0;
     const float Kd = 0.05; //0.7
   //desiredState at 0 means the difference between the distances from both walls is 0, aka they're even distance apart.
@@ -32,7 +32,7 @@ class StateMachine {
     float prevError = 0;
     float kiTotal = 0;
   //Used in inbetween_rows.
-    int pwmSpeed = 42;
+    int pwmSpeed = 100;
     float pidResult = 0;
   //Used in searching_for_rows
     int leftCurrentSpeed = 0;
