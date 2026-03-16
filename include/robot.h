@@ -11,7 +11,7 @@
 #include "lidar.h"
 #include "inocompat.h"
 #include "sketch.h"
-
+#include "logger.h"
 
 enum DriveMode {
     MANUAL,
@@ -22,6 +22,7 @@ enum DriveMode {
 class Robot {
   public:
     Robot();
+	~Robot();
         
 	void LoadConfig();
 
@@ -43,7 +44,8 @@ class Robot {
     void SetPose(const pose& inPose);
 
     void UpdateSensors(const std::vector<Obstacle>& obstacles);
-	void UpdateControl();
+    void UpdateControl();
+	void UpdateLog();
     pose UpdatePose(float dt);
     // Getter Functions
   private:
@@ -52,8 +54,10 @@ class Robot {
     robo r;
 	// Struct for pose of robot
     pose p;
+    
     DataLayer dataLayer;
-	//AutoControl autoControl;
+	Logger logger;
+    //AutoControl autoControl;
     float rightVel = 0.0f;
 	float leftVel = 0.0f;
     float vel = 0.0f;

@@ -5,7 +5,6 @@
 #include "robot.h"
 #include <iostream>
 #include "types.h"
-#include "logger.h"
 
 class World {
     public:
@@ -43,8 +42,6 @@ class World {
     Obstacles obs;
 	// Robot class 
     Robot robot;
-	// Logger class
-    Logger logger;
 
     // Gets all close obstacles to pass to collision detection
     std::vector<Obstacle> CollisionClose(const pose& p);

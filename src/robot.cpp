@@ -4,6 +4,9 @@
 Robot::Robot() : lidar(720, 20.0f) {
 }
 
+Robot::~Robot() {
+    logger.Close();
+}    
 
 void Robot::LoadConfig() {
     try {
@@ -29,7 +32,9 @@ void Robot::LoadConfig() {
     controller.LoadConfig("config/sim.yaml");
 	ArduinoCompat::SetDataLayer(&dataLayer);
 	setup();
-	ArduinoCompat::SetDataLayer(nullptr);
+    ArduinoCompat::SetDataLayer(nullptr);
+
+	logger.OpenFile("log.csv");
 }
 
 void Robot::UpdateSensors(const std::vector<Obstacle>& obstacles) {
@@ -49,7 +54,12 @@ void Robot::UpdateControl() {
     ArduinoCompat::SetDataLayer(nullptr);
 }
 
-
+// Log data only in auto mode
+void Robot::UpdateLog() { 
+	if (driveMode == AUTO) {
+		logger.LogData(p, dataLayer);
+    }
+}
 
 // Maps 0 to max speed of robot to 0 - 255 pwm?
 void Robot::PWMtoVel() {

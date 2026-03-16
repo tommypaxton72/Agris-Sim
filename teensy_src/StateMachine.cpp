@@ -21,7 +21,7 @@ void StateMachine::stop(){
 void StateMachine::PID(float sideDifference, float gyro){
   //TP float headingCorrection = ransac.bestLine.a * 10.0f;
 
-  float error = (desiredState - sideDifference); //TP + headingCorrection;
+  float error = (sideDifference - desiredState);
 
 //Kp*e(t)
   double proportional = Kp * error;

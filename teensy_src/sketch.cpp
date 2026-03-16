@@ -138,10 +138,10 @@ void loop() {
 		//Checks if detect angles are within a certain thresh-hold.
         //45 -> 135 degrees is right side
         //225 -> 315 is left side.
-        if (m.angle > 225.0f && m.angle <= 315.0f) {
+        if (m.angle > 45.0f && m.angle <= 135.0f) {
             rightSideAngles.push_back(m.angle);
             rightSideDistances.push_back(m.distance);
-        } else if (m.angle > 45.0f && m.angle <= 135.0f) {
+        } else if (m.angle > 225.0f && m.angle <= 315.0f) {
             leftSideAngles.push_back(m.angle);
             leftSideDistances.push_back(m.distance);
         }
@@ -210,8 +210,8 @@ void loop() {
 
         // Cache validation results so we don't call them multiple times per tick
         bool rightOk = ransacRight.lineValidation();
-        bool leftOk  = ransacLeft.lineValidation();
-
+        bool leftOk = ransacLeft.lineValidation();
+        
         switch (S.STATE) {
 
             case S.STOP:
@@ -232,14 +232,7 @@ void loop() {
             case S.INBETWEEN_ROWS:
                 // Four possible wall visibility states — each has its own steering input
 
-                // ============= Print Line difference here ==============
-				if (ArduinoCompat::g_dataLayer) {
-                    ArduinoCompat::g_dataLayer->debug.lineDifference = lineDifference;
-                    ArduinoCompat::g_dataLayer->debug.zRate = zRateDegreesPerSecond;
-                    ArduinoCompat::g_dataLayer->debug.PIDResult = S.GetPIDResult();
-					ArduinoCompat::g_dataLayer->debug.state = (int)S.STATE;
-                    }
-                
+                    
                 if (rightOk && leftOk) {
                     // Both walls visible — use the signed difference to centre between them
                     timeSinceValidation = 0;
@@ -284,6 +277,20 @@ void loop() {
                     Serial.println("Switching back to inbetween");
                 }
                 break;
-        }
-    }
+		}
+
+            
+		if (ArduinoCompat::g_dataLayer) {
+			ArduinoCompat::g_dataLayer->debug.lineDifference = lineDifference;
+			ArduinoCompat::g_dataLayer->debug.leftDistance   = leftOk  ? leftDistance  : 0.0f;
+			ArduinoCompat::g_dataLayer->debug.rightDistance  = rightOk ? rightDistance : 0.0f;
+			ArduinoCompat::g_dataLayer->debug.zRate          = zRateDegreesPerSecond;
+			ArduinoCompat::g_dataLayer->debug.PIDResult      = S.GetPIDResult();
+			ArduinoCompat::g_dataLayer->debug.state          = (int)S.STATE;
+		}
+	}
 }
+				
+
+
+
