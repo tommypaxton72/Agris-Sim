@@ -21,6 +21,7 @@ target_include_directories(AgrisSim PRIVATE
     include
     /opt/mingw/include
     teensy_include
+    hardwarecompat
 )
 
 target_link_directories(AgrisSim PRIVATE /opt/mingw/lib)
