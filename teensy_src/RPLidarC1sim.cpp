@@ -138,7 +138,8 @@ bool RPLidarC1::get_measurement(RPLidarMeasurement* measurement) {
         const LidarPoint& pt = data.points[_simIndex];
 
         // Convert radians to degrees — the real lidar outputs degrees
-        measurement->angle    = pt.angle * (180.0f / M_PI);
+		
+        measurement->angle    = 360 - (pt.angle * (180.0f / M_PI));
 
         // Distance passes through unchanged — both are in mm
         measurement->distance = pt.distance;

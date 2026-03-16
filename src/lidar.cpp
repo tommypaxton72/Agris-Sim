@@ -1,6 +1,7 @@
 #include "lidar.h"
 #include <cmath>
 
+
 Lidar::Lidar(int inNumofRays, float maxDist) {
     numofRays = inNumofRays;
 	maxDistance = maxDist;
@@ -14,10 +15,17 @@ void Lidar::SetConfig(int rays, float maxDist) {
 LidarData Lidar::GetScan(const pose& p, const std::vector<Obstacle>& obstacle) {
     LidarData data;
     std::vector<Obstacle> nearby = CheckObstacles(p, obstacle);
-    float angleStep = (2.0f * M_PI) / numofRays;
-	
+    
+    float angleStep = 1 * (2.0f * M_PI) / numofRays;
+
     for (int i = 0; i < numofRays; i++) {
-        data.points[i].angle = p.theta + i * angleStep;
+        // Passes data as radians with ccw as postive.
+        float angle = p.theta + i * angleStep;
+        // Normalize data if its ever above or below 360 degrees.
+		// I dont think it will ever be below but im just being safe.
+        if (angle > (2.0f * M_PI)) { angle -= 2.0f * M_PI; }
+		if (angle < 0.0f) { angle += 2.0f * M_PI; }
+        data.points[i].angle = angle;
         data.points[i].distance = CastRay(p, nearby, data.points[i].angle);
     }
 	data.count = numofRays;

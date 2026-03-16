@@ -43,18 +43,19 @@
 
 * Data Layer
 ** Debug
+ * Left and right line distance
  * Line difference
  * PID results
  * RANSAC Lines
- * PWM values
- * ?
-
-
-
-
+ * Left and Right PWM values
+ * Yaw rate in degrees per second (Z)
+   
 * Sensors feedback
 ** Lidar
+ * Lidar data is stored in radians with CCW positive like traditional math.
+ * However hardware lidar expects CW positive for inputs so lidarc1sim.cpp converts the data by converting radians to degrees and subtracting by 360 to correct for this. 
 ** IMU
+ * Might want to add gaussian noise to IMU simulation at some point.
 
 ------
 
@@ -72,6 +73,7 @@
  * The build environment is on an Ubuntu 22.04 VM running docker.
  * SFML was a pain to setup due to bugs in the most recent versions and issues with cross  compilations for windows.
  * I want to make it where the container doesnt output all the messsy cmake generated files but rather just the .exe
+ * All files are statically linked so the only files needed are the font file and config files.
 ** Docker Setup
  * Ubuntu base image.
  * Gets tool chains required.
@@ -81,9 +83,7 @@
 
 ------
 *  To Do List
-** TODO Add outputs for debugging
-** TODO Verify Data is being sent to sketch.cpp correctly.
-** TODO Change window setup
 ** TODO Make a build script that runs rsync and builds the project
 ** TODO Make class diagram
-** TODO Would be nice for SFML to display the PWM values being set for the wheels
+** TODO Clean up logger and maybe add more data to the display and logger?
+** TODO Maybe make the switch from manual mode to auto mode zero out data layer and reset state.
