@@ -17,6 +17,8 @@ struct LogEntry {
     float pidResult;
     float zRate;
     int state;
+    bool leftValid = false;
+	bool rightValid = false;
 };
 
 class Logger {

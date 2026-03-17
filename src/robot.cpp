@@ -19,18 +19,34 @@ void Robot::LoadConfig() {
         p.x = config["robot"]["startX"].as<float>();
         p.y = config["robot"]["startY"].as<float>();
         p.theta = config["robot"]["startTheta"].as<float>();
+        
+		dataLayer.PIDconfig.Kp = config["PID"]["Kp"].as<float>();
+        dataLayer.PIDconfig.Ki = config["PID"]["Ki"].as<float>();
+        dataLayer.PIDconfig.Kd = config["PID"]["Kd"].as<float>();
 
+        dataLayer.motorConfig.baseSpeed = config["Motor"]["baseSpeed"].as<int>();
+		dataLayer.motorConfig.steeringLimitRatio = config["Motor"]["steeringLimitRatio"].as<float>();
+		dataLayer.motorConfig.minMotorPWM = config["Motor"]["minMotorPWM"].as<int>();
+		dataLayer.motorConfig.maxMotorPWM = config["Motor"]["maxMotorPWM"].as<float>();
+		dataLayer.motorConfig.aggressiveThreshold = config["Motor"]["aggressiveThreshold"].as<float>();
+		dataLayer.motorConfig.aggressiveMultiplier = config["Motor"]["aggressiveMultiplier"].as<float>();
+
+        
         int rays   = config["robot"]["lidarRays"].as<int>();
         float maxD = config["robot"]["lidarMaxDistance"].as<float>();
         lidar.SetConfig(rays, maxD);
+		
+		
 
     } catch (const YAML::BadFile& e) {
         std::cerr << "Could not load robot.yaml: " << e.what() << std::endl;
     } catch (const YAML::Exception& e) {
         std::cerr << "Error parsing robot.yaml: " << e.what() << std::endl;
     }
+
     controller.LoadConfig("config/sim.yaml");
-	ArduinoCompat::SetDataLayer(&dataLayer);
+
+    ArduinoCompat::SetDataLayer(&dataLayer);
 	setup();
     ArduinoCompat::SetDataLayer(nullptr);
 

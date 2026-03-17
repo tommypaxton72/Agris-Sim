@@ -32,9 +32,8 @@ int main() {
     sf::Clock clock;
     // Only one loop
     while (renderer.IsOpen()) {
-        float dt = clock.restart().asSeconds();
         renderer.PollEvents();
-        world.Update(dt);
+        world.Update(config.dt);
         renderer.Draw(world);
     }
 

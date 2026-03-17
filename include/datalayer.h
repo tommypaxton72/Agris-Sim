@@ -33,10 +33,27 @@ struct RANSACLine {
     bool  valid = false;  // only draw if RANSAC found a line with enough inliers
 };
 
+struct PIDControl {
+    float Kp = 0.35f;
+    float Ki = 0.0f;
+    float Kd = 0.05f;
+};
+
+struct DriveControl {
+    int baseSpeed = 100;
+    float steeringLimitRatio = 0.8f;
+    int minMotorPWM = 40;
+    int maxMotorPWM = 255;
+    float aggressiveThreshold = 200.0f;
+    float aggressiveMultiplier = 1.5f;
+};    
+
 struct Debug {
     float lineDifference = 0.0f;
     RANSACLine leftLine;
-	RANSACLine rightLine;
+    bool leftValid = false;
+    RANSACLine rightLine;
+	bool rightValid = false;
     float zRate = 0.0f;
     float PIDResult = 0.0f;
     float leftDistance = 0.0f;
@@ -49,6 +66,8 @@ struct DataLayer {
 	IMU imu;
     MotorControl leftMotor;
     MotorControl rightMotor;
+    PIDControl PIDconfig;
+	DriveControl motorConfig;
 	Debug debug;
     };
 

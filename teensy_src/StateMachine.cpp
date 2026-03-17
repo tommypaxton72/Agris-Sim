@@ -51,20 +51,20 @@ void StateMachine::inbetween_rows(float sideDifference, float gyro){
 
 // Multiplies pidResult if there is a large difference in distance.
 // Helps the car turn more aggresively if it is too far away.
-  if(abs(desiredState - sideDifference) > 200){
-    pidResult *= 1.5;
+  if(abs(desiredState - sideDifference) > aggressiveThreshold){
+    pidResult *= aggressiveMultiplier;
   }
 
 // Limits the steering so it doesn't over-steer
-  int steeringLimit = pwmSpeed * 0.8;
+  int steeringLimit = pwmSpeed * steeringLimitRatio;
   pidResult = constrain(pidResult, -steeringLimit, steeringLimit);
 
   int leftSpeed = pwmSpeed + pidResult;
   int rightSpeed = pwmSpeed - pidResult;
 
 // Constrains speed between 30 to 255, which 255 is the limit for the motors, and below 40 the motors struggle
-  leftSpeed = constrain(leftSpeed, 40, 255);
-  rightSpeed = constrain(rightSpeed, 40, 255);
+  leftSpeed = constrain(leftSpeed, minMotorPWM, maxMotorPWM);
+  rightSpeed = constrain(rightSpeed, minMotorPWM, maxMotorPWM);
 
   leftCurrentSpeed = leftSpeed;
   rightCurrentSpeed = rightSpeed;  
@@ -84,3 +84,20 @@ void StateMachine::searching_for_walls(){
 //void StateMachine::end_of_row(){}
 
 //void StateMachine::detected_weed(){}
+
+
+
+// TP
+// Setting PID and other tuneable variables using yaml
+void StateMachine::Configure(const DriveControl& config, const PIDControl& pidConfig) {
+    pwmSpeed           = config.baseSpeed;
+    minMotorPWM        = config.minMotorPWM;
+    maxMotorPWM        = config.maxMotorPWM;
+    aggressiveThreshold  = config.aggressiveThreshold;
+    aggressiveMultiplier = config.aggressiveMultiplier;
+    steeringLimitRatio   = config.steeringLimitRatio;
+
+	Kp = pidConfig.Kp;
+    Ki = pidConfig.Ki;
+    Kd = pidConfig.Kd;
+    }

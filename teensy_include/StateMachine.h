@@ -3,6 +3,8 @@
 
 #include "RANSAC.h"
 
+#include "datalayer.h"
+
 class StateMachine {
   public:
     enum AGVSTATE { STOP, INBETWEEN_ROWS, SEARCHING_FOR_WALLS/*, END_OF_ROW, DETECTED_WEED*/ };
@@ -19,13 +21,13 @@ class StateMachine {
     void PID(float sideDifference, float gyro);
 
     //TP RANSAC ransac;
-
+	void Configure(const DriveControl& config, const PIDControl& PIDConfig);
 	const float& GetPIDResult() const { return pidResult; };
   private:
   //Tuning Variables
-    const float Kp = .35; //0.35
-    const float Ki = 0.0;
-    const float Kd = 0.05; //0.7
+    float Kp = .35; //0.35
+    float Ki = 0.0;
+    float Kd = 0.05; //0.7
   //desiredState at 0 means the difference between the distances from both walls is 0, aka they're even distance apart.
     const float desiredState = 0;
   //Errors
@@ -37,6 +39,13 @@ class StateMachine {
   //Used in searching_for_rows
     int leftCurrentSpeed = 0;
     int rightCurrentSpeed = 0;
-};
+
+    // Tuneable variables    
+    int minMotorPWM = 40;
+    int maxMotorPWM = 255;
+    float aggressiveThreshold = 200.0f;
+    float aggressiveMultiplier = 1.5f;
+	float steeringLimitRatio = 0.8f;
+    };
 
 #endif

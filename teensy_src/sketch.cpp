@@ -102,11 +102,13 @@ void setup() {
     Serial.print(processIMU.biasZ);
 
     S.STATE = S.STOP;
+
+	S.Configure(ArduinoCompat::g_dataLayer->motorConfig, ArduinoCompat::g_dataLayer->PIDconfig);
 }
 
 
 void loop() {
-    // Vectors to hold the converted LiDAR points
+    // Vectors to hold the converted LiDAR point
 
     static float lineDifference  = 0.0f;
     static float rightDistance   = 0.0f;
@@ -198,7 +200,9 @@ void loop() {
                         ransacLeft.bestLine.b,
                         ransacLeft.bestLine.c,
                         ransacLeft.lineValidation()
-					};
+                        };
+					ArduinoCompat::g_dataLayer->debug.leftValid  = ransacLeft.lineValidation();
+					ArduinoCompat::g_dataLayer->debug.rightValid = ransacRight.lineValidation();
 				}
 			}
         }
@@ -240,7 +244,7 @@ void loop() {
 
                 } else if (rightOk && !leftOk) {
                     // Right wall only — maintain a fixed distance from it
-                    rightOnlyDistanceDifference = desiredOneLineDistance - rightDistance;
+                    rightOnlyDistanceDifference = rightDistance - desiredOneLineDistance;
                     S.inbetween_rows(rightOnlyDistanceDifference, zRateDegreesPerSecond);
 
                 } else if (!rightOk && leftOk) {

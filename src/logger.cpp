@@ -8,11 +8,12 @@ void Logger::OpenFile(const std::string& filename) {
         std::cerr << "[Logger] Failed to open file: " << filename << "\n";
         return;
     }
-    
-    file << "timestamp,x,y,theta,"
-         << "leftPWM,rightPWM,"
-         << "leftDistance,rightDistance,"
-         << "lineDifference,pidResult,zRate,state\n";
+
+	file << "timestamp,x,y,theta,"
+		 << "leftPWM,rightPWM,"
+		 << "leftDistance,rightDistance,"
+		 << "lineDifference,pidResult,zRate,state,"
+		 << "leftValid,rightValid\n";
 
 	startTime = (unsigned long)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 	
@@ -36,6 +37,9 @@ void Logger::LogData(const pose& p, const DataLayer& dataLayer) {
     entry.pidResult = dataLayer.debug.PIDResult;
     entry.zRate = dataLayer.debug.zRate;
     entry.state = dataLayer.debug.state;
+	entry.leftValid  = dataLayer.debug.leftValid;
+	entry.rightValid = dataLayer.debug.rightValid;
+    
 
     buffer.push_back(entry);
 
@@ -59,19 +63,12 @@ void Logger::Close() {
 void Logger::Flush() {
     if (!file.is_open()) return;
     for (const auto& e : buffer) {
-        file << e.timestamp << ","
-             << e.x << ","
-             << e.y << ","
-             << e.theta << ","
-             << e.leftPWM << ","
-             << e.rightPWM << ","
-             << e.leftDistance << ","
-             << e.rightDistance << ","
-             << e.lineDifference << ","
-             << e.pidResult << ","
-             << e.zRate << ","
-             << e.state << "\n";
-    }
+		file << e.timestamp << "," << e.x << "," << e.y << "," << e.theta << ","
+			 << e.leftPWM << "," << e.rightPWM << ","
+			 << e.leftDistance << "," << e.rightDistance << ","
+			 << e.lineDifference << "," << e.pidResult << "," << e.zRate << "," << e.state << ","
+			 << e.leftValid << "," << e.rightValid << "\n"; // <- << needed before each field
+}
 
     buffer.clear();
 }
