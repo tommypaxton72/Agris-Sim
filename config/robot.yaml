@@ -1,10 +1,23 @@
 robot:
-  width: 16
-  length: 10.0
-  maxV: 10.0
-  wheelDistance: 10
-  startX: 20.0
-  startY: 20.0
+  width: 304.5 #mm
+  length: 406.5 #mm
+  maxV: 500 #mm/s
+  wheelDistance: 304.5 #mm
+  startX: 800
+  startY: 4000
   startTheta: 0.0
   lidarRays: 720
-  lidarMaxDistance: 150.0
+  lidarMaxDistance: 10000 #mm
+
+PID:
+  Kp: 0.35
+  Ki: 0.0
+  Kd: 0.05
+
+Motor:
+  baseSpeed: 100
+  steeringLimitRatio: 0.8
+  minMotorPWM: 40
+  maxMotorPWM: 255
+  aggressiveThreshold: 200.0
+  aggressiveMultiplier: 1.5

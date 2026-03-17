@@ -1,18 +1,18 @@
 # sim.yaml
 sim:
-  windowWidth: 50
-  windowHeight: 50
+  windowWidth: 1920
+  windowHeight: 1080
   windowTitle: "Agris Sim"
   targetFPS: 60
   dt: 0.016        # fixed timestep in seconds
-  worldX: 50.0
-  worldY: 50.0
-  showLidar: 1
+  worldX: 10000
+  worldY: 8000
+  showLidar: true
 
 controller:
   joystickIndex: 0        # which controller if multiple are connected
   leftStickAxis: 1        # Y axis of left stick
-  rightStickAxis: 3       # Y axis of right stick
+  rightStickAxis: 5       # Y axis of right stick
   deadzone: 10.0          # ignore stick values within this range of 0
-  invertLeft: false       # flip left stick direction if needed
-  invertRight: false      # flip right stick direction if needed
+  invertLeft: true       # flip left stick direction if needed
+  invertRight: true      # flip right stick direction if needed

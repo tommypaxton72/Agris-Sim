@@ -5,7 +5,7 @@
 #include "StateMachine.h"
 #include "AGVPins.h"
 #include "Sensors.h"
-#include <LSM6.h>
+#include "LSM6.h"
 
 #include <vector>
 #include <deque>
@@ -36,7 +36,10 @@ deque<float> rightSideAngles,  rightSideDistances;
 float xsoftThreshhold = 127.0f;  // 127mm = 5 inches
 
 //Consant distances for when only on wall is applicable in mm
-const float desiredOneLineDistance = 203.20f;
+
+// At some point this really needs to be setup in a different way thats maybe more dynamic rather than hard coded.
+// Anytime a ransac line gets dropped it causes pretty rough error change.
+const float desiredOneLineDistance = 578.0f;
 
 //Limits the amount in a deque to around 3-5 seconds worth of LiDAR data.
 // 18000 (angle and distance) -> ~5 seconds. 
