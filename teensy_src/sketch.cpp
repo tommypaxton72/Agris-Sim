@@ -105,8 +105,9 @@ void setup() {
     Serial.print(processIMU.biasZ);
 
     S.STATE = S.STOP;
-
+    #ifdef SIM
 	S.Configure(ArduinoCompat::g_dataLayer->motorConfig, ArduinoCompat::g_dataLayer->PIDconfig);
+    #endif
 }
 
 
@@ -128,7 +129,7 @@ void loop() {
     static vector<points> rightCartesianConverted;
     static vector<points> leftCartesianConverted;
 
-    // IMU doesnt work in sim right now
+    // IMU sorta works in sim right now
     imu.read();
     float rawZ     = imu.g.z;
     float centeredZ = rawZ - processIMU.biasZ;
@@ -189,6 +190,8 @@ void loop() {
 
                 // Calculation for finding the distance between RANSAC lines. Use this for PID as an error to correct.
                 lineDifference = rightDistance - leftDistance;
+                
+                #ifdef SIM
                 if (ArduinoCompat::g_dataLayer) {
                     ArduinoCompat::g_dataLayer->debug.leftDistance = leftDistance;
 					ArduinoCompat::g_dataLayer->debug.rightDistance = rightDistance;
@@ -206,8 +209,9 @@ void loop() {
                         };
 					ArduinoCompat::g_dataLayer->debug.leftValid  = ransacLeft.lineValidation();
 					ArduinoCompat::g_dataLayer->debug.rightValid = ransacRight.lineValidation();
-				}
-			}
+                }
+                #endif
+            }
         }
 	}        
     
@@ -286,7 +290,7 @@ void loop() {
                 break;
 		}
 
-            
+        #ifdef SIM
 		if (ArduinoCompat::g_dataLayer) {
 			ArduinoCompat::g_dataLayer->debug.lineDifference = lineDifference;
 			ArduinoCompat::g_dataLayer->debug.leftDistance   = leftOk  ? leftDistance  : 0.0f;
@@ -295,6 +299,7 @@ void loop() {
 			ArduinoCompat::g_dataLayer->debug.PIDResult      = S.GetPIDResult();
 			ArduinoCompat::g_dataLayer->debug.state          = (int)S.STATE;
 		}
+        #endif
 	}
 }
 				

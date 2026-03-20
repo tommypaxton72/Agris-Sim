@@ -40,5 +40,8 @@
 # debug information files
 *.dwo
 
+# Ignore VS Code
+.vscode/
+
 # Ignore build folder
 build/
