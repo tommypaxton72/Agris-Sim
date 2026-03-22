@@ -1,14 +1,20 @@
 #ifndef DATALAYER_H
 #define DATALAYER_H
 
+#include <cstdint>
+
 struct LidarPoint {
     float distance = 0.0f;
 	float angle = 0.0f;
+    uint8_t quality = 0;
+    bool valid = false;
+    uint16_t timeStamp = 0;
 };
 
 struct LidarData {
     LidarPoint points[1000];
     int count = 0;
+    uint32_t time = 0;
 	bool scanComplete = false;
 };
 
@@ -49,17 +55,20 @@ struct DriveControl {
 };    
 
 struct Debug {
-    float lineDifference = 0.0f;
+    float lineDifference  = 0.0f;
     RANSACLine leftLine;
-    bool leftValid = false;
+    bool  leftValid       = false;
     RANSACLine rightLine;
-	bool rightValid = false;
-    float zRate = 0.0f;
-    float PIDResult = 0.0f;
-    float leftDistance = 0.0f;
-    float rightDistance = 0.0f;
-	int state = 0;
-    };    
+    bool  rightValid      = false;
+    float zRate           = 0.0f;
+    float PIDResult       = 0.0f;
+    float leftDistance    = 0.0f;
+    float rightDistance   = 0.0f;
+    int   state           = 0;
+    int   noLineCounter   = 0;   // add
+    float waypointX       = 0.0f; // add
+    float waypointY       = 0.0f; // add
+};    
 
 struct DataLayer {
     LidarData lidarData;

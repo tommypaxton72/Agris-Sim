@@ -55,6 +55,7 @@ void Robot::LoadConfig() {
 
 void Robot::UpdateSensors(const std::vector<Obstacle>& obstacles) {
     // Pass obstacles to lidar to generate a fresh scan this frame
+    dataLayer.lidarData.scanComplete = false;
     dataLayer.lidarData = lidar.GetScan(p, obstacles);
 }
 
@@ -62,11 +63,12 @@ void Robot::UpdateControl() {
 
     ArduinoCompat::SetDataLayer(&dataLayer);
 
-
     while (!dataLayer.lidarData.scanComplete) {
+        
         loop();
-    }
 
+    }   
+    
     ArduinoCompat::SetDataLayer(nullptr);
 }
 

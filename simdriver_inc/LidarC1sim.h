@@ -1,0 +1,62 @@
+#ifndef LIDARC1_H
+#define LIDARC1_H
+
+#ifndef SIM
+#include <Arduino.h>
+#else
+#include "inocompat.h"
+#include "RPLidarC1sim.h"
+#endif
+
+#include <cstdint>
+#include "datastructs.h"
+#include "Config.h"
+
+struct ParserData {
+    uint32_t timeStamp;
+    bool     startFlag;
+    bool     invFlag;
+    uint8_t  quality;
+    float    angle;
+    float    distance;
+};
+
+struct HealthData {
+    uint8_t  status;
+    uint16_t errorCode;
+};
+
+class LidarC1 {
+    public:
+        LidarC1();
+        LidarC1(HardwareSerial& serial);
+        bool begin(uint32_t baudrate);
+        void GetHealth();
+        void StartScan();
+        void Stop();
+        void Reset();
+        void MotorSpeed(uint16_t RPM);
+        LidarData GetFullScan(uint8_t NumofCycles);
+        LidarData GetSingleScan();
+        void serialClear();
+        HealthData Health;
+
+    private:
+        bool GetDescriptor(uint8_t expectedDataType);
+        bool GetHealthResponse();
+        bool ReadScanPacket();
+        void ParseScanPacket(const uint8_t Packet[5]);
+        bool FilterData();
+        ParserData      Parser;
+        HardwareSerial dummySerial; // dummy serial for sim
+        HardwareSerial& serial;
+        uint32_t        serialTimeout = 1000;
+        uint32_t        TCMD          = 0;
+        bool            Scanning      = false;
+
+        #ifdef SIM
+        RPLidarC1 simLidar; // reads from DataLayer instead of serial
+        #endif
+};
+
+#endif

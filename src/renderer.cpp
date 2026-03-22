@@ -290,7 +290,24 @@ void Renderer::DrawData(const DataLayer& dataLayer) {
     state.setCharacterSize(16);
     state.setFillColor(sf::Color::Blue);
 	state.setPosition(20.0f, 195.0f);
-	state.setString("State: " + std::string(StateToString(dataLayer.debug.state)));   
+	state.setString("State: " + std::string(StateToString(dataLayer.debug.state))); 
+    
+    // Add these alongside the existing text draws
+    sf::Text noLineCount;
+    noLineCount.setFont(font);
+    noLineCount.setCharacterSize(16);
+    noLineCount.setFillColor(sf::Color::Yellow);
+    noLineCount.setPosition(20.0f, 220.0f);
+    noLineCount.setString("NoLineCnt: " + std::to_string(dataLayer.debug.noLineCounter));
+    
+
+    sf::Text waypoint;
+    waypoint.setFont(font);
+    waypoint.setCharacterSize(16);
+    waypoint.setFillColor(sf::Color::Cyan);
+    waypoint.setPosition(20.0f, 245.0f);
+    waypoint.setString("WP: " + fmt(dataLayer.debug.waypointX) + ", " + fmt(dataLayer.debug.waypointY));
+    
     
     
     window.draw(leftPWM);
@@ -301,7 +318,8 @@ void Renderer::DrawData(const DataLayer& dataLayer) {
     window.draw(zRate);
     window.draw(PIDResult);
 	window.draw(state);
-    
+    window.draw(noLineCount);
+    window.draw(waypoint);
 	window.setView(worldView);
 }
 

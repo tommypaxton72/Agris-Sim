@@ -14,13 +14,15 @@ find_package(SFML 2.6 REQUIRED COMPONENTS graphics window system)
 
 set_property(TARGET OpenGL PROPERTY INTERFACE_LINK_LIBRARIES "opengl32")
 
-file(GLOB_RECURSE SOURCES "src/*.cpp" "teensy_src/*.cpp" "simdriver_src/*.cpp")
+add_compile_definitions(SIM)
+
+file(GLOB_RECURSE SOURCES "src/*.cpp" "Teensy_src/*.cpp" "simdriver_src/*.cpp")
 add_executable(AgrisSim ${SOURCES})
 
 target_include_directories(AgrisSim PRIVATE 
     include
     /opt/mingw/include
-    teensy_include
+    Teensy_include
     simdriver_inc
 )
 
