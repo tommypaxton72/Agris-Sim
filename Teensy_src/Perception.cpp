@@ -49,7 +49,10 @@ void Perception::UpdateFilteredLidar() {
 // True if collision detected, false otherwise
 bool Perception::CheckCollision() {
     for (int i = 0; i < MAX_LIDAR_POINTS; i++) {
-        if (lidarData.points[i].distance < AGV_BUBBLE && lidarData.points[i].valid) { return true; }
+        if (lidarData.points[i].distance < AGV_BUBBLE &&
+            lidarData.points[i].valid) {
+                return true;
+            }
     }
     return false;
 }
@@ -58,7 +61,8 @@ void Perception::UpdateRANSAC() {
     
     Row testRow  = ransac.RunRansac(lidarData);
     
-    
+    // Check slope difference before validating ransac line
+    // Lines should not change a lot while inbetween rows
     if (testRow.leftLine.m - rowBuffer[0].leftLine.m < RANSAC_SLOPE_CHANGE_THRESHOLD) {
         rowBuffer[1].leftLine = testRow.leftLine;
         rowBuffer[1].leftLine.valid = true;

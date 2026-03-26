@@ -4,7 +4,6 @@
 // Tuning constants — change these to match your hardware
 // =============================================================================
 
-// Pose.cpp — rename to avoid macro collision
 static const float TICKS_PER_REV        = 360.0f;
 static const float WHEEL_DIAMETER_MM    = 100.0f;
 static const float WHEEL_CIRCUMFERENCE  = WHEEL_DIAMETER_MM * 3.14159f;  // renamed
@@ -134,13 +133,11 @@ void Position::UpdatePosition(float dt) {
     if (gpsNewFix) {
         currentPose.x = (1.0f - GPS_WEIGHT) * currentPose.x + GPS_WEIGHT * gpsX;
         currentPose.y = (1.0f - GPS_WEIGHT) * currentPose.y + GPS_WEIGHT * gpsY;
-        gpsNewFix = false; // consume the fix
+        gpsNewFix = false;
     }
 }
 
 float Position::TicksToMM(int32_t ticks) {
-    // Convert encoder tick count to linear distance in mm
-    // distance = (ticks / ticks_per_rev) * circumference
     return ((float)ticks / TICKS_PER_REV) * WHEEL_CIRCUMFERENCE;
 }
 

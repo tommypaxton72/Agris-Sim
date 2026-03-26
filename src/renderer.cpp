@@ -166,47 +166,38 @@ void Renderer::DrawLidar(const pose& p, const LidarData& data) {
     }
 }
 void Renderer::DrawRANSACLine(const pose& p, const RANSACLine& line, sf::Color color) {
-    // Don't draw if RANSAC hasn't found anything yet — all zeros means no data
-    if (line.a == 0.0f && line.b == 0.0f && line.c == 0.0f) return;
+    // Don't draw if RANSAC hasn't found a line yet
+    if (!line.valid) return;
 
-    // The line equation is Ax + By + C = 0 in robot-centred coordinates.
-    // To find two drawable points we pick two x values either side of the
-    // robot and solve for y: y = -(Ax + C) / B
-    // Then add the robot's world position to move from robot space to world space.
-    // We use a large span (3000mm either side) so the line extends well past
-    // the visible obstacles.
-
+    // Line equation is x = m*y + b in robot-centred coordinates.
+    // y is the independent variable because crop rows run parallel to the
+    // robot's forward axis — this avoids vertical line singularity.
+    // Pick two y values along the forward axis and solve for x.
     const float span = 3000.0f;
 
-    float x1 = -span;
-    float x2 =  span;
+    float y1 = -span;
+    float y2 =  span;
+    float x1 = line.m * y1 + line.b;
+    float x2 = line.m * y2 + line.b;
 
-    float y1, y2;
+    float cos = std::cos(p.theta);
+    float sin = std::sin(p.theta);
 
-    if (std::fabs(line.b) > 0.0001f) {
-        // Normal case — solve for y given x
-        y1 = -(line.a * x1 + line.c) / line.b;
-        y2 = -(line.a * x2 + line.c) / line.b;
-    } else {
-        // Line is nearly vertical — solve for x given y instead
-        // Ax + C = 0  →  x = -C/A
-        x1 = -line.c / line.a;
-        x2 = x1;
-        y1 = -span;
-        y2 =  span;
-    }
-
-    // Convert from robot-centred to world coordinates by adding robot position
+    float wx1 = x1 * cos - y1 * sin;
+    float wy1 = x1 * sin + y1 * cos;
+    float wx2 = x2 * cos - y2 * sin;
+    float wy2 = x2 * sin + y2 * cos;
+    
     sf::VertexArray lineShape(sf::Lines, 2);
-    lineShape[0].position = sf::Vector2f(p.x + x1, p.y + y1);
-    lineShape[1].position = sf::Vector2f(p.x + x2, p.y + y2);
+    lineShape[0].position = sf::Vector2f(p.x + wx1, p.y + wy1);
+    lineShape[1].position = sf::Vector2f(p.x + wx2, p.y + wy2);
     lineShape[0].color    = color;
     lineShape[1].color    = color;
 
     window.draw(lineShape);
 }
 
-// Converts state int back to a readable string for display
+// This needs to be changed for the new states
 static const char* StateToString(int state) {
     switch (state) {
         case 0: return "STOP";
@@ -292,21 +283,14 @@ void Renderer::DrawData(const DataLayer& dataLayer) {
 	state.setPosition(20.0f, 195.0f);
 	state.setString("State: " + std::string(StateToString(dataLayer.debug.state))); 
     
-    // Add these alongside the existing text draws
-    sf::Text noLineCount;
-    noLineCount.setFont(font);
-    noLineCount.setCharacterSize(16);
-    noLineCount.setFillColor(sf::Color::Yellow);
-    noLineCount.setPosition(20.0f, 220.0f);
-    noLineCount.setString("NoLineCnt: " + std::to_string(dataLayer.debug.noLineCounter));
-    
+
 
     sf::Text waypoint;
     waypoint.setFont(font);
     waypoint.setCharacterSize(16);
     waypoint.setFillColor(sf::Color::Cyan);
     waypoint.setPosition(20.0f, 245.0f);
-    waypoint.setString("WP: " + fmt(dataLayer.debug.waypointX) + ", " + fmt(dataLayer.debug.waypointY));
+    waypoint.setString("WP: " + fmt(dataLayer.debug.waypoint.x) + ", " + fmt(dataLayer.debug.waypoint.y));
     
     
     
@@ -318,7 +302,6 @@ void Renderer::DrawData(const DataLayer& dataLayer) {
     window.draw(zRate);
     window.draw(PIDResult);
 	window.draw(state);
-    window.draw(noLineCount);
     window.draw(waypoint);
 	window.setView(worldView);
 }

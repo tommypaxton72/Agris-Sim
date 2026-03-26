@@ -46,18 +46,22 @@ class StateMachine {
 
         void Start();
         void Run();
-        
+
+        // Getters
+        const Waypoint& GetGlobalWaypoint(int idx) const { return globalWaypoints[idx]; }
     private:
+        // Classes
         Perception perception;
         Position robotPose;
         MotorController motorControl;
         PathFinder control;
 
+        // Enums
         MainState mState = ManualDrive;
         SubState sState = START;
 
 
-        
+        // Structs
         Waypoint globalWaypoints[MAX_WAYPOINTS];
 
         uint32_t lastDetectionTime = 0;

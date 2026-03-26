@@ -27,42 +27,41 @@ class Position {
     private:
         Pose currentPose;
 
-        // --- Sensor objects ---
+
         #ifndef SIM
         LSM6 imu;
         QMC5883LCompass compass;
         #endif
 
-        // --- Timing ---
-        uint32_t lastUpdateTime = 0; // tracks dt between updates
 
-        // --- Encoder state ---
-        // Raw tick counts read from hardware each loop
+        uint32_t lastUpdateTime = 0;
+
+
+
         int32_t leftTicks  = 0;
         int32_t rightTicks = 0;
         int32_t lastLeftTicks  = 0;
         int32_t lastRightTicks = 0;
 
-        // --- GPS state ---
+
         float gpsX = 0.0f;
         float gpsY = 0.0f;
-        bool  gpsNewFix = false; // true when a fresh GPS fix is available
+        bool  gpsNewFix = false;
 
-        // --- Heading complementary filter state ---
-        float filteredHeading = 0.0f; // radians, 0 = forward
+        float filteredHeading = 0.0f;
 
-        // --- Sensor update methods ---
-        void ReadIMU();        // reads gyro Z rate
-        void ReadCompass();    // reads absolute heading
-        void ReadEncoders();   // reads left and right tick counts
-        void ReadGPS();        // reads GPS position if new fix available
 
-        // --- Fusion methods ---
-        void UpdateHeading(float dt);   // complementary filter: gyro + compass
-        void UpdatePosition(float dt);  // dead reckoning from encoders + GPS snap
+        void ReadIMU();
+        void ReadCompass();
+        void ReadEncoders();
+        void ReadGPS();
 
-        // --- Helpers ---
-        float TicksToMM(int32_t ticks); // converts encoder ticks to mm traveled
+
+        void UpdateHeading(float dt);
+        void UpdatePosition(float dt);
+
+
+        float TicksToMM(int32_t ticks);
 };
 
 #endif

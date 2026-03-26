@@ -88,3 +88,6 @@
 ** TODO Clean up logger and maybe add more data to the display and logger?
 ** TODO Maybe make the switch from manual mode to auto mode zero out data layer and reset state.
 ** TODO Figure out a better setup for managing simulation time through the simulator. I think it might be messing up the PID and controls.
+
+
+ docker run -it -v "$(pwd)":/project agrissim:latest

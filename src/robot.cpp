@@ -68,7 +68,8 @@ void Robot::UpdateControl() {
         loop();
 
     }   
-    
+    std::cout << "leftLine  m=" << dataLayer.debug.leftLine.m  << " b=" << dataLayer.debug.leftLine.b  << "\n";
+    std::cout << "rightLine m=" << dataLayer.debug.rightLine.m << " b=" << dataLayer.debug.rightLine.b << "\n";
     ArduinoCompat::SetDataLayer(nullptr);
 }
 

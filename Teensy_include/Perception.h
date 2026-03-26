@@ -20,7 +20,6 @@ class Perception {
     public:
         Perception();
         
-        void Update();
 
         bool CheckCollision();
         void UpdateLidarData();
@@ -29,22 +28,27 @@ class Perception {
         void GenerateWaypoint();
         void Reset();
 
-        bool LeftLineValid() { return rowBuffer[1].leftLine.valid; };
-        bool RightLineValid() { return rowBuffer[1].rightLine.valid; };
+        
         // Getters
         LidarData& GetLidarData() {return lidarData;};
         RansacLine& GetLeftRansac() {return rowBuffer[1].leftLine; };
         RansacLine& GetRightRansac() {return rowBuffer[1].rightLine; };
-        Waypoint& GetLocalWaypoint() {return localWaypoint;};
+        Waypoint& GetLocalWaypoint() {return localWaypoint; };
+        bool LeftLineValid() { return rowBuffer[1].leftLine.valid; };
+        bool RightLineValid() { return rowBuffer[1].rightLine.valid; };
 
         // Might look at making circular buffer for Row storage
         // uint8_t IncrementRowBuffer() { return }
+        #ifdef SIM
+        
+
+        #endif
     private:
+        // Classes
         RANSAC ransac;
+        LidarC1 lidar;
 
-        LidarC1 lidar;  // hardware serial driver — not used in sim
-
-
+        // Structs
         LidarData lidarData;
         Waypoint localWaypoint;
         Row rowBuffer[ROW_BUFFER_SIZE];

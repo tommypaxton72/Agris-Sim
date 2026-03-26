@@ -42,9 +42,14 @@
 
 # clangd files
 .cache/
+.clangd
+.clang-format
 
 # Ignore VS Code
 .vscode/
+.devcontainer/
+
+# Ignore 
 
 # Ignore build folder
 build/

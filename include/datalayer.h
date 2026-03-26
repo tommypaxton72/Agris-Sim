@@ -33,10 +33,10 @@ struct MotorControl {
 };
 
 struct RANSACLine {
-    float a     = 0.0f;
-    float b     = 0.0f;
-    float c     = 0.0f;
-    bool  valid = false;  // only draw if RANSAC found a line with enough inliers
+    float m = 0; // slope
+    float b = 0; // intercept
+    uint16_t inliers = 0; // number of inliers
+    bool valid = false;
 };
 
 struct PIDControl {
@@ -54,6 +54,11 @@ struct DriveControl {
     float aggressiveMultiplier = 1.5f;
 };    
 
+struct DebugWaypoint {
+    float x = 0;
+    float y = 0;
+};
+
 struct Debug {
     float lineDifference  = 0.0f;
     RANSACLine leftLine;
@@ -65,9 +70,7 @@ struct Debug {
     float leftDistance    = 0.0f;
     float rightDistance   = 0.0f;
     int   state           = 0;
-    int   noLineCounter   = 0;   // add
-    float waypointX       = 0.0f; // add
-    float waypointY       = 0.0f; // add
+    DebugWaypoint waypoint = {0, 0};
 };    
 
 struct DataLayer {

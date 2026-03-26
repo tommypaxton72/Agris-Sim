@@ -6,6 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Get build tools and other things
 RUN apt-get update && apt-get install -y \
     build-essential \
+    gdb \
     vim \
     git \
     mingw-w64 \
