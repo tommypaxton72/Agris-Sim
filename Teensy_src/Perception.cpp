@@ -58,7 +58,8 @@ void Perception::UpdateRANSAC() {
     
     Row testRow  = ransac.RunRansac(lidarData);
     
-    
+    // Check slope difference before validating ransac line
+    // Lines should not change a lot while inbetween rows
     if (testRow.leftLine.m - rowBuffer[0].leftLine.m < RANSAC_SLOPE_CHANGE_THRESHOLD) {
         rowBuffer[1].leftLine = testRow.leftLine;
         rowBuffer[1].leftLine.valid = true;

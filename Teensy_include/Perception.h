@@ -42,7 +42,7 @@ class Perception {
     private:
         RANSAC ransac;
 
-        LidarC1 lidar;  // hardware serial driver — not used in sim
+        LidarC1 lidar;
 
 
         LidarData lidarData;
