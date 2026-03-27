@@ -180,10 +180,17 @@ void Renderer::DrawRANSACLine(const pose& p, const RANSACLine& line, sf::Color c
     float x1 = line.m * y1 + line.b;
     float x2 = line.m * y2 + line.b;
 
-    // Add robot world position to convert from robot-centred to world coordinates
+    float cos = std::cos(p.theta);
+    float sin = std::sin(p.theta);
+
+    float wx1 = x1 * cos - y1 * sin;
+    float wy1 = x1 * sin + y1 * cos;
+    float wx2 = x2 * cos - y2 * sin;
+    float wy2 = x2 * sin + y2 * cos;
+    
     sf::VertexArray lineShape(sf::Lines, 2);
-    lineShape[0].position = sf::Vector2f(p.x + x1, p.y + y1);
-    lineShape[1].position = sf::Vector2f(p.x + x2, p.y + y2);
+    lineShape[0].position = sf::Vector2f(p.x + wx1, p.y + wy1);
+    lineShape[1].position = sf::Vector2f(p.x + wx2, p.y + wy2);
     lineShape[0].color    = color;
     lineShape[1].color    = color;
 

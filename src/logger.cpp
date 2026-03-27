@@ -13,7 +13,8 @@ void Logger::OpenFile(const std::string& filename) {
 		 << "leftPWM,rightPWM,"
 		 << "leftDistance,rightDistance,"
 		 << "lineDifference,pidResult,zRate,state,"
-		 << "leftValid,rightValid\n";
+		 << "leftValid,rightValid,"
+         << "waypointX, waypointY\n";
 
 	startTime = (unsigned long)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 	
@@ -39,6 +40,8 @@ void Logger::LogData(const pose& p, const DataLayer& dataLayer) {
     entry.state = dataLayer.debug.state;
 	entry.leftValid  = dataLayer.debug.leftValid;
 	entry.rightValid = dataLayer.debug.rightValid;
+    entry.waypoint.x = dataLayer.debug.waypoint.x;
+    entry.waypoint.y = dataLayer.debug.waypoint.y;
     
 
     buffer.push_back(entry);
@@ -67,7 +70,7 @@ void Logger::Flush() {
 			 << e.leftPWM << "," << e.rightPWM << ","
 			 << e.leftDistance << "," << e.rightDistance << ","
 			 << e.lineDifference << "," << e.pidResult << "," << e.zRate << "," << e.state << ","
-			 << e.leftValid << "," << e.rightValid << "\n"; // <- << needed before each field
+			 << e.leftValid << "," << e.rightValid << "," << e.waypoint.x << "," << e.waypoint.y << "\n";
 }
 
     buffer.clear();

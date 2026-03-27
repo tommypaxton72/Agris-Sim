@@ -7,7 +7,6 @@
 #include "types.h"
 #include "datalayer.h"
 
-
 struct LogEntry {
     unsigned long timestamp;
     float x, y, theta;
@@ -19,6 +18,8 @@ struct LogEntry {
     int state;
     bool leftValid = false;
 	bool rightValid = false;
+    DebugWaypoint waypoint;
+
 };
 
 class Logger {

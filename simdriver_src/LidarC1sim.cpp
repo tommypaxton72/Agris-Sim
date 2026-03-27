@@ -63,16 +63,6 @@ LidarData LidarC1::GetFullScan(uint8_t NumofCycles) {
     }
 
     scan.count = IDX;
-    // In LidarC1sim::GetFullScan()
-    Serial.print("[LidarC1sim] scan.count=");
-    Serial.print(IDX);
-    Serial.print(" sample angle=");
-    Serial.print(scan.points[0].angle);
-    Serial.print(" dist=");
-    Serial.print(scan.points[0].distance);
-    Serial.print(" quality=");
-    Serial.println((int)scan.points[0].quality);
-
     // Unblock robot.cpp's while(!scanComplete) loop
     if (ArduinoCompat::g_dataLayer) {
         ArduinoCompat::g_dataLayer->lidarData.scanComplete = true;
