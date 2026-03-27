@@ -49,7 +49,10 @@ void Perception::UpdateFilteredLidar() {
 // True if collision detected, false otherwise
 bool Perception::CheckCollision() {
     for (int i = 0; i < MAX_LIDAR_POINTS; i++) {
-        if (lidarData.points[i].distance < AGV_BUBBLE && lidarData.points[i].valid) { return true; }
+        if (lidarData.points[i].distance < AGV_BUBBLE &&
+            lidarData.points[i].valid) {
+                return true;
+            }
     }
     return false;
 }

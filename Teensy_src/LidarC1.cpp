@@ -219,7 +219,10 @@ LidarData LidarC1::GetFullScan(uint8_t NumofCycles) {
         if (Scanning) {
             if (IDX < MAX_LIDAR_POINTS) {
                 while (true) {
-                    if (!ReadScanPacket()) return scan;
+                    if (!ReadScanPacket()) {
+                        scan.count = IDX + 1;
+                        return scan;
+                    }
                     if (Parser.startFlag) {
                         StartTime = millis();
                         scan.points[IDX].timeStamp = Parser.timeStamp;
@@ -231,7 +234,10 @@ LidarData LidarC1::GetFullScan(uint8_t NumofCycles) {
                     }
                 }
                 while (true) {
-                    if (!ReadScanPacket()) return scan;
+                    if (!ReadScanPacket()) {
+                        scan.count = IDX + 1;
+                        return scan;
+                    }
                     if (!Parser.startFlag) {
                         scan.points[IDX].timeStamp = Parser.timeStamp;
                         scan.points[IDX].quality = Parser.quality;
@@ -240,7 +246,7 @@ LidarData LidarC1::GetFullScan(uint8_t NumofCycles) {
                         IDX++;
                     } else {
                         scan.time = millis() - StartTime;
-                        scan.count = IDX;
+                        scan.count = IDX + 1;
                         break;
                     }
                 }

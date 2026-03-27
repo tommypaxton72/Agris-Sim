@@ -40,6 +40,7 @@ void StateMachine::MainTransitionTo(MainState newState) {
 
 // Main State-Machine Switch
 void StateMachine::Run() {
+    
     #ifndef SIM
     // Check for manual/autodrive serial
     #else
@@ -113,6 +114,7 @@ void StateMachine::RunManual() {
 
 }
 #else
+// Need to have empty definition for Sim
 void StateMachine::RunManual() {}
 #endif
 
@@ -134,6 +136,7 @@ void StateMachine::RunAuto() {
             // Need to add an actual start condition
             sState = INBETWEEN_ROWS;
             break;
+            
         case INBETWEEN_ROWS:
             InbetweenRows();
             break;
@@ -180,11 +183,28 @@ void StateMachine::InbetweenRows() {
         DataLayer& dl = *ArduinoCompat::g_dataLayer;
         dl.debug.leftValid    = perception.LeftLineValid();
         dl.debug.rightValid   = perception.RightLineValid();
-        dl.debug.leftDistance = perception.GetLeftRansac().b;   // x intercept of left line
-        dl.debug.rightDistance= perception.GetRightRansac().b;  // x intercept of right line
-        dl.debug.lineDifference = perception.GetLocalWaypoint().x; // lateral offset
+
+        dl.debug.leftLine.m      = perception.GetLeftRansac().m;
+        dl.debug.leftLine.b      = perception.GetLeftRansac().b;
+        dl.debug.leftLine.inliers= perception.GetLeftRansac().inliers;
+        dl.debug.leftLine.valid  = perception.GetLeftRansac().valid;
+
+        dl.debug.rightLine.m      = perception.GetRightRansac().m;
+        dl.debug.rightLine.b      = perception.GetRightRansac().b;
+        dl.debug.rightLine.inliers= perception.GetRightRansac().inliers;
+        dl.debug.rightLine.valid  = perception.GetRightRansac().valid;
+
+
+        dl.debug.waypoint.x = GetGlobalWaypoint(waypointIndex).x;
+        dl.debug.waypoint.y = GetGlobalWaypoint(waypointIndex).y;
+
         dl.debug.PIDResult    = control.GetAngle();
+
         dl.debug.state        = (int)sState;
+
+        dl.leftMotor.PWM = control.GetLeftPWM();
+        dl.rightMotor.PWM = control.GetRightPWM();
+        
     }
     #endif
 
@@ -200,13 +220,15 @@ void StateMachine::GenerateGlobalWaypoint() {
         } else {
             waypointIndex = 0;
         }
-    }
     
-    Waypoint localWaypoint = perception.GetLocalWaypoint();
-    // Pose pose = robotPose.GetGlobalPose();
-    // waypoint[waypointIndex] = localWaypoint + pose;
+    
+        Waypoint localWaypoint = perception.GetLocalWaypoint();
+        Pose pose = robotPose.GetCurrentPose();
+
+        globalWaypoints[waypointIndex].x = localWaypoint.x + pose.x;
+        globalWaypoints[waypointIndex].y = localWaypoint.y + pose.y;
+    }
 }
-    // Reset Variables and Stat
 
 void StateMachine::EndofRow() {
     // Pointer to ScanData

@@ -45,6 +45,7 @@
 
 # Ignore VS Code
 .vscode/
+.devcontainer/
 
 # Ignore build folder
 build/

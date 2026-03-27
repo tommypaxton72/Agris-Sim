@@ -35,8 +35,8 @@ class LidarC1 {
         void Stop();
         void Reset();
         void MotorSpeed(uint16_t RPM);
-        bool GetSingleScan();
-        bool GetFullScan(uint8_t NumofCycles);
+        LidarData GetSingleScan();
+        LidarData GetFullScan(uint8_t NumofCycles);
         void serialClear();
         HealthData Health;
     private:
