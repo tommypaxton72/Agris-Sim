@@ -48,6 +48,7 @@
 # Ignore VS Code
 .vscode/
 .devcontainer/
+.claude/
 
 # Ignore 
 

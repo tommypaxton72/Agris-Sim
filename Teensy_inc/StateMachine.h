@@ -9,9 +9,11 @@
 
 #ifdef SIM
 #include "inocompat.h"
+#include <iostream>
 #endif
 
 #include <cstdint>
+
 
 #include "datastructs.h"
 #include "Config.h"
@@ -48,7 +50,21 @@ class StateMachine {
         void Run();
 
         // Getters
-        const Waypoint& GetGlobalWaypoint(int idx) const { return globalWaypoints[idx]; }
+        const SubState GetDriveState() const { return sState; };
+
+        const Waypoint& GetGlobalWaypoint(int idx) const { return globalWaypoints[idx]; };
+        const uint8_t& GetWaypointIndex() const { return waypointIndex; };
+
+        const Row& GetRansacRows() const { return perception.GetRowData(); };
+        const LidarData& GetLidarData() const { return perception.GetLidarData(); };
+
+        const Pose& GetCurrentPose() const { return robotPose.GetCurrentPose(); };
+        
+        const MotorCommands& GetMotorCommands() const { return control.GetMotorCommands(); };
+
+        #ifdef SIM
+        Debug GetDebug();
+        #endif
     private:
         // Classes
         Perception perception;
@@ -86,11 +102,12 @@ class StateMachine {
 
         bool InbetweenRowCondition();
         bool EndOfRowCondition();
+        bool TurningCondition();
 
         void ResetAll();
         void ResetAuto();
         void ResetManual();
-        
+
 };
 
 

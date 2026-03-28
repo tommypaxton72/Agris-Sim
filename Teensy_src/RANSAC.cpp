@@ -1,5 +1,9 @@
 #include "RANSAC.h"
 
+// Notes
+// Need to test if ransac tries to output a line of a row behind.
+
+
 // RANSAC implementation
 RANSAC::RANSAC() {}
 

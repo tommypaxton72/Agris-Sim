@@ -10,19 +10,25 @@
 #include <random>
 #include <algorithm>
 
-// Config.h must be included before datalayer.h so pin defines are available
+// Config.h must be included before dataStruct.h so pin defines are available
 // when analogWrite/digitalWrite are defined below
 #include "Config.h"
 
 // ---------------------------------------------------------------------------
-// Forward declare DataLayer so analogWrite/digitalWrite can write into it
-// datalayer.h is included below after the stubs
+// Forward declare Debug so analogWrite/digitalWrite can write into it
+// datastructs.h is included below after the stubs
 // ---------------------------------------------------------------------------
-struct DataLayer;
+struct Debug;
+struct LidarData;
 
 namespace ArduinoCompat {
-    inline DataLayer* g_dataLayer = nullptr;
-    inline void SetDataLayer(DataLayer* dl) { g_dataLayer = dl; }
+    inline Debug*     g_dataLayer = nullptr;   // firmware motor outputs
+    inline LidarData* g_lidarData = nullptr;   // LidarC1sim reads scan data
+    inline float*     g_gyroZ     = nullptr;   // LSM6 reads gyro Z
+
+    inline void SetDataLayer(Debug* d)     { g_dataLayer = d; }
+    inline void SetLidarData(LidarData* l) { g_lidarData = l; }
+    inline void SetGyroZ(float* g)         { g_gyroZ = g; }
 }
 
 // ---------------------------------------------------------------------------
@@ -150,24 +156,24 @@ inline _SerialClass Serial3;
 inline void pinMode(int, int) {}
 inline int  digitalRead(int)  { return 0; }
 
-// analogWrite and digitalWrite route into DataLayer using pin defines from Config.h
+// analogWrite and digitalWrite route into Debug using pin defines from Config.h
 // If g_dataLayer is null (e.g. during early init) these are safe no-ops
-#include "datalayer.h"
+#include "datastructs.h"
 
 inline void analogWrite(int pin, int value) {
     if (!ArduinoCompat::g_dataLayer) return;
-    DataLayer& dl = *ArduinoCompat::g_dataLayer;
-    if      (pin == LPWM) dl.leftMotor.PWM  = value;
-    else if (pin == RPWM) dl.rightMotor.PWM = value;
+    Debug& dl = *ArduinoCompat::g_dataLayer;
+    if      (pin == LPWM) dl.motor.leftMotor.PWM  = value;
+    else if (pin == RPWM) dl.motor.rightMotor.PWM = value;
 }
 
 inline void digitalWrite(int pin, int value) {
     if (!ArduinoCompat::g_dataLayer) return;
-    DataLayer& dl = *ArduinoCompat::g_dataLayer;
+    Debug& dl = *ArduinoCompat::g_dataLayer;
     // LINB HIGH = left motor reverse, LOW = forward
-    if      (pin == LINB) dl.leftMotor.direction  = (value == HIGH) ? REVERSE : FORWARD;
+    if      (pin == LINB) dl.motor.leftMotor.direction  = (value == HIGH) ? Reverse : Forward;
     // RINB HIGH = right motor reverse, LOW = forward
-    else if (pin == RINB) dl.rightMotor.direction = (value == HIGH) ? REVERSE : FORWARD;
+    else if (pin == RINB) dl.motor.rightMotor.direction = (value == HIGH) ? Reverse : Forward;
 }
 
 // ---------------------------------------------------------------------------

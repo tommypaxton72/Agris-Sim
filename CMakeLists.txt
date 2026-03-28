@@ -16,17 +16,18 @@ set_property(TARGET OpenGL PROPERTY INTERFACE_LINK_LIBRARIES "opengl32")
 
 add_compile_definitions(SIM)
 
-file(GLOB_RECURSE SOURCES "src/*.cpp" "Teensy_src/*.cpp" "simdriver_src/*.cpp")
+file(GLOB_RECURSE SOURCES "sim_src/*.cpp" "Teensy_src/*.cpp" "simdriver_src/*.cpp")
 
 list(FILTER SOURCES EXCLUDE REGEX ".*LidarC1\\.cpp$")
+list(FILTER SOURCES EXCLUDE REGEX ".*RPLidarC1sim\\.cpp$")
 
 add_executable(AgrisSim ${SOURCES})
 
 
-target_include_directories(AgrisSim PRIVATE 
-    include
+target_include_directories(AgrisSim PRIVATE
+    sim_inc
     /opt/mingw/include
-    Teensy_include
+    Teensy_inc
     simdriver_inc
 )
 

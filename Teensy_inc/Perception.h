@@ -27,15 +27,15 @@ class Perception {
         void UpdateRANSAC();
         void GenerateWaypoint();
         void Reset();
-
+        uint8_t CheckRows();
         
         // Getters
-        LidarData& GetLidarData() {return lidarData;};
-        RansacLine& GetLeftRansac() {return rowBuffer[1].leftLine; };
-        RansacLine& GetRightRansac() {return rowBuffer[1].rightLine; };
-        Waypoint& GetLocalWaypoint() {return localWaypoint; };
-        bool LeftLineValid() { return rowBuffer[1].leftLine.valid; };
-        bool RightLineValid() { return rowBuffer[1].rightLine.valid; };
+        const LidarData& GetLidarData() const { return lidarData;};
+        const Row& GetRowData() const { return rowBuffer[1]; };
+        const Waypoint& GetLocalWaypoint() const { return localWaypoint; };
+
+        const bool LeftLineValid()  const { return rowBuffer[1].leftLine.valid; };
+        const bool RightLineValid() const { return rowBuffer[1].rightLine.valid; };
 
         // Might look at making circular buffer for Row storage
         // uint8_t IncrementRowBuffer() { return }
@@ -51,7 +51,7 @@ class Perception {
         // Structs
         LidarData lidarData;
         Waypoint localWaypoint;
-        Row rowBuffer[ROW_BUFFER_SIZE];
+        Row rowBuffer[ROW_BUFFER_SIZE]; // Need to implement better way of setting row buffer.
         
         
 

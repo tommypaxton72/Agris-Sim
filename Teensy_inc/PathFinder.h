@@ -30,9 +30,8 @@ class PathFinder {
                            const Waypoint& globalWaypoint,
                            const Pose& currentPose);
 
-        // Left and right motor PWM — feed directly to MotorControl
-        uint8_t GetLeftPWM()  { return leftPWM;  };
-        uint8_t GetRightPWM() { return rightPWM; };
+        // Getters
+        const MotorCommands& GetMotorCommands() const { return motor; };
 
         // Steering angle in degrees — negative = left, positive = right
         // Derived from curvature, useful for logging and AutoForward compatibility
@@ -42,8 +41,8 @@ class PathFinder {
         WaypointMode GetActiveMode() { return activeMode; };
 
     private:
-        uint8_t leftPWM      = 0;
-        uint8_t rightPWM     = 0;
+        MotorCommands motor;
+
         float steeringAngle  = 0.0f; // degrees
         WaypointMode activeMode = WaypointMode::Local;
 

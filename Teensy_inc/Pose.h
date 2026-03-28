@@ -22,7 +22,7 @@ class Position {
         void UpdatePose();
 
         // Getters
-        const Pose& GetCurrentPose() { return currentPose; };
+        const Pose& GetCurrentPose() const { return currentPose; };
 
     private:
         Pose currentPose;

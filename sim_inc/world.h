@@ -24,16 +24,11 @@ class World {
 	const std::vector<Obstacle>& GetObstacles() const { return obs.GetObstacles(); };
 	const WorldSize& GetWorldSize() const { return worldSize; };
     const LidarData& GetLidarData() const { return robot.GetLidarData(); };
-	const RANSACLine& GetRightLine() const { return robot.GetRightLine(); };
-    const RANSACLine& GetLeftLine() const { return robot.GetLeftLine(); };
-	const MotorControl& GetLeftMotor() const { return robot.GetLeftMotor(); };
-    const MotorControl& GetRightMotor() const { return robot.GetRightMotor(); };
-    const float& GetLeftVel() const { return robot.GetLeftVel(); };
-    const float& GetRightVel() const {
-        return robot.GetRightVel();
-    };
-	const DataLayer& GetDataLayer() const { return robot.GetDataLayer(); };
-	const Debug& GetDebug() const {return robot.GetDebug(); };
+	const RansacLine& GetRightLine() const { return robot.GetRightLine(); };
+    const RansacLine& GetLeftLine()  const { return robot.GetLeftLine(); };
+    const float& GetLeftVel()  const { return robot.GetLeftVel(); };
+    const float& GetRightVel() const { return robot.GetRightVel(); };
+	const Debug& GetDebug() const { return robot.GetDebug(); };
     void PrintLidarDebug();
   private:
 	// Worldsize{x, y}

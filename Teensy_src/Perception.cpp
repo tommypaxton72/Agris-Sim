@@ -63,21 +63,21 @@ void Perception::UpdateRANSAC() {
     
     // Check slope difference before validating ransac line
     // Lines should not change a lot while inbetween rows
-    if (testRow.leftLine.m - rowBuffer[0].leftLine.m < RANSAC_SLOPE_CHANGE_THRESHOLD) {
+    if (fabsf(testRow.leftLine.m - rowBuffer[0].leftLine.m) < RANSAC_SLOPE_CHANGE_THRESHOLD) {
         rowBuffer[1].leftLine = testRow.leftLine;
         rowBuffer[1].leftLine.valid = true;
     } else {
         rowBuffer[1].leftLine.valid = false; }
 
-    if (testRow.rightLine.m - rowBuffer[0].rightLine.m < RANSAC_SLOPE_CHANGE_THRESHOLD) {
+    if (fabsf(testRow.rightLine.m - rowBuffer[0].rightLine.m) < RANSAC_SLOPE_CHANGE_THRESHOLD) {
         rowBuffer[1].rightLine = testRow.rightLine;
         rowBuffer[1].rightLine.valid = true;
     } else {
         rowBuffer[1].rightLine.valid = false;
 
     }
-    rowBuffer[0] = rowBuffer[1];
-    rowBuffer[1] = testRow;
+    rowBuffer[0] = rowBuffer[1]; // Row buffer[0] = Old Data
+    rowBuffer[1] = testRow;      // Row buffer[1] = New Data
     
 
 }
@@ -89,32 +89,63 @@ void Perception::GenerateWaypoint() {
     if (rowBuffer[1].leftLine.valid && rowBuffer[1].rightLine.valid) {
     
         // Logic to generate waypoint from both lines
-        float line1 = rowBuffer[1].leftLine.m * LOOKAHEAD_DISTANCE + rowBuffer[1].leftLine.b; // y = mx + b at x=0
-        float line2 = rowBuffer[1].rightLine.m * LOOKAHEAD_DISTANCE + rowBuffer[1].rightLine.b; // y = mx + b at x=0
-        localWaypoint.x = (line1 + line2) / 2; // Average of the two lines' intercepts
+        float line1 = rowBuffer[1].leftLine.m * (-LOOKAHEAD_DISTANCE) + rowBuffer[1].leftLine.b;
+        float line2 = rowBuffer[1].rightLine.m * (-LOOKAHEAD_DISTANCE) + rowBuffer[1].rightLine.b;
+        localWaypoint.x = -((line1 + line2) / 2); // Negate: CW +x=rightward, PathFinder needs opposite sign
         localWaypoint.y = LOOKAHEAD_DISTANCE;
         localWaypoint.valid = true;
 
     } else if (rowBuffer[1].leftLine.valid) {
-        
+        localWaypoint.valid = false;
         // Logic to generate waypoint from left line and old right line
     
     
     
     } else if (rowBuffer[1].rightLine.valid) {
         // Logic to generate waypoint from right line and old left line
-
+        localWaypoint.valid = false;
 
 
     } else {
         // No valid lines, return old waypoint or some default
-
+        localWaypoint.valid = false;
 
 
 
     }
 }
 
+/* End of Row Detection
+There has to be a better way that knows the end of the row.
+This method lets robot keep going forward for a while before it figures it out
+Maybe if there was a way for the robot to slow down as it gets closer to the end of a row?
+
+using values as enum
+0 = both rows
+1 = just left
+2 = just right
+3 = both missing */
+uint8_t Perception::CheckRows() {
+    uint16_t rightHit = 0;
+    uint16_t leftHit = 0;
+    for (uint16_t i = 0; i < MAX_LIDAR_POINTS; i++) {
+        // These angles are hard coded might change that later
+        if (lidarData.points[i].angle > 90 && lidarData.points[i].angle <120 && 
+            lidarData.points[i].quality > 5 && lidarData.points[i].distance < 750.0f) {
+            rightHit++;
+        };
+        if (lidarData.points[i].angle > 270 && lidarData.points[i].angle < 300 && 
+            lidarData.points[i].quality > 5 && lidarData.points[i].distance < 750.0f) {
+            leftHit++;
+        };
+    } // These minimums are also hardcoded
+    if (rightHit >= NUM_OF_HITS && leftHit >= NUM_OF_HITS) { return 0; };
+    if (rightHit < NUM_OF_HITS && leftHit > NUM_OF_HITS) { return 1; };
+    if (rightHit > NUM_OF_HITS && leftHit < NUM_OF_HITS) { return 2; };
+    if (rightHit < NUM_OF_HITS && leftHit < NUM_OF_HITS) { return 3; };
+    return 5; // return Error
+}
+
 void Perception::Reset() {
-    
+    return;
 }

@@ -108,10 +108,10 @@ void PathFinder::CalcOutputs(float curvature) {
     //   left speeds up, right slows down -> robot arcs right
     // Negative curvature (turn left):
     //   left slows down, right speeds up -> robot arcs left
-    float left  = BASE_SPEED * (1.0f + curvature * HALF_WHEELBASE);
-    float right = BASE_SPEED * (1.0f - curvature * HALF_WHEELBASE);
+    float left  = BASE_SPEED * (1.0f - curvature * HALF_WHEELBASE);
+    float right = BASE_SPEED * (1.0f + curvature * HALF_WHEELBASE);
 
     // Clamp to valid PWM range
-    leftPWM  = (uint8_t)constrain(left,  0.0f, 255.0f);
-    rightPWM = (uint8_t)constrain(right, 0.0f, 255.0f);
+    motor.leftMotor.PWM  = (uint8_t)constrain(left,  0.0f, 255.0f);
+    motor.rightMotor.PWM = (uint8_t)constrain(right, 0.0f, 255.0f);
 }
