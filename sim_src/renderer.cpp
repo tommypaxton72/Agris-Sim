@@ -84,13 +84,14 @@ void Renderer::Draw(const World& world) {
     }
 	// Draw RANSAC lines on top of everything else so they're always visible.
     // Green = valid line used for steering, red = invalid/not enough inliers.
+
     DrawRANSACLine(p, world.GetRightLine(),
         world.GetRightLine().valid ? sf::Color(0, 255, 0, 200) : sf::Color(255, 0, 0, 120));
     DrawRANSACLine(p, world.GetLeftLine(),
         world.GetLeftLine().valid  ? sf::Color(0, 255, 0, 200) : sf::Color(255, 0, 0, 120));
 
 
-	DrawData(world.GetDataLayer());
+	DrawData(world.GetDebug());
 
     window.display();
 
@@ -146,6 +147,7 @@ void Renderer::DrawRobot(const pose& p, const robo& r) {
     window.draw(heading);
 }
 
+// Lidar gets set to zero if its above the maximum so it only draws the lines that hit an object.
 void Renderer::DrawLidar(const pose& p, const LidarData& data) {
 	int N = 15;
     for (int i = 0; i < data.count; i += N) {
@@ -153,11 +155,12 @@ void Renderer::DrawLidar(const pose& p, const LidarData& data) {
         
         // Ray starts at robot center
         ray[0].position = sf::Vector2f(p.x, p.y);
-        
-        // Ray end point calculated from angle and distance
+        // Lidar is stored as degrees needs to convert to rads
+        float angleRad = data.points[i].angle * (M_PI / 180.0f);
+
         ray[1].position = sf::Vector2f(
-            p.x + data.points[i].distance * std::cos(data.points[i].angle),
-            p.y + data.points[i].distance * std::sin(data.points[i].angle));
+        p.x + data.points[i].distance * std::cos(p.theta - angleRad),
+        p.y + data.points[i].distance * std::sin(p.theta - angleRad));
         
         ray[0].color = sf::Color(255, 255, 0, 100); // yellow, semi-transparent
         ray[1].color = sf::Color(255, 255, 0, 100);
@@ -165,7 +168,7 @@ void Renderer::DrawLidar(const pose& p, const LidarData& data) {
         window.draw(ray);
     }
 }
-void Renderer::DrawRANSACLine(const pose& p, const RANSACLine& line, sf::Color color) {
+void Renderer::DrawRANSACLine(const pose& p, const RansacLine& line, sf::Color color) {
     // Don't draw if RANSAC hasn't found a line yet
     if (!line.valid) return;
 
@@ -183,10 +186,13 @@ void Renderer::DrawRANSACLine(const pose& p, const RANSACLine& line, sf::Color c
     float cos = std::cos(p.theta);
     float sin = std::sin(p.theta);
 
-    float wx1 = x1 * cos - y1 * sin;
-    float wy1 = x1 * sin + y1 * cos;
-    float wx2 = x2 * cos - y2 * sin;
-    float wy2 = x2 * sin + y2 * cos;
+    // RANSAC frame: x=lateral(left+), y=longitudinal(backward+, forward-)
+    // Robot-standard: forward=-y_ransac, left=+x_ransac
+    // World transform: wx = -sin*x - cos*y,  wy = cos*x - sin*y
+    float wx1 =  sin * x1 - cos * y1;
+    float wy1 = -cos * x1 - sin * y1;
+    float wx2 =  sin * x2 - cos * y2;
+    float wy2 = -cos * x2 - sin * y2;
     
     sf::VertexArray lineShape(sf::Lines, 2);
     lineShape[0].position = sf::Vector2f(p.x + wx1, p.y + wy1);
@@ -202,12 +208,16 @@ static const char* StateToString(int state) {
     switch (state) {
         case 0: return "STOP";
         case 1: return "INBETWEEN_ROWS";
-        case 2: return "SEARCHING_FOR_WALLS";
+        case 2: return "END_OF_ROW";
+        case 3: return "TURNING";
+        case 4: return "ALIGNING";
+        case 5: return "ESTOP";
+        case 6: return "COLLISION_AVOIDANCE";
         default: return "UNKNOWN";
     }
 }
 
-void Renderer::DrawData(const DataLayer& dataLayer) {
+void Renderer::DrawData(const Debug& debug) {
 	window.setView(window.getDefaultView());
 
     sf::Text leftPWM;
@@ -215,18 +225,18 @@ void Renderer::DrawData(const DataLayer& dataLayer) {
     sf::Text leftDistance;
 	sf::Text rightDistance;
     sf::Text lineDifference;
-    sf::Text zRate;
-	sf::Text PIDResult;
 	sf::Text state;
+    sf::Text lWaypoint;
+    sf::Text gWaypoint;
 
     leftPWM.setFont(font);
     rightPWM.setFont(font);
 	leftDistance.setFont(font);
     rightDistance.setFont(font);
     lineDifference.setFont(font);
-    zRate.setFont(font);
-    PIDResult.setFont(font);
 	state.setFont(font);
+    lWaypoint.setFont(font);
+    gWaypoint.setFont(font);
 
     auto fmt = [](float v) {
         char buf[32];
@@ -234,75 +244,62 @@ void Renderer::DrawData(const DataLayer& dataLayer) {
         return std::string(buf);
     };
 
-    
-	// Left Motor
+	// Left Motor PWM
 	leftPWM.setCharacterSize(16);
     leftPWM.setFillColor(sf::Color::White);
     leftPWM.setPosition(20.0f, 20.0f);
-    leftPWM.setString("L: " + fmt(dataLayer.leftMotor.PWM));
+    leftPWM.setString("L: " + fmt(debug.motor.leftMotor.PWM));
 
-	// Right Motor
+	// Right Motor PWM
     rightPWM.setCharacterSize(16);
     rightPWM.setFillColor(sf::Color::White);
     rightPWM.setPosition(20.0f, 45.0f);
-    rightPWM.setString("R: " + fmt(dataLayer.rightMotor.PWM));
+    rightPWM.setString("R: " + fmt(debug.motor.rightMotor.PWM));
 
     // Left Wall
 	leftDistance.setCharacterSize(16);
     leftDistance.setFillColor(sf::Color::White);
     leftDistance.setPosition(20.0f, 70.0f);
-    leftDistance.setString("Left Wall: " + fmt(dataLayer.debug.leftDistance));
+    leftDistance.setString("Left Wall: " + fmt(debug.RansacLines.leftLine.b));
 
     // Right Wall
     rightDistance.setCharacterSize(16);
     rightDistance.setFillColor(sf::Color::White);
     rightDistance.setPosition(20.0f, 95.0f);
-    rightDistance.setString("Right Wall: " + fmt(dataLayer.debug.rightDistance));
-    
+    rightDistance.setString("Right Wall: " + fmt(debug.RansacLines.rightLine.b));
+
     // Line difference
     lineDifference.setCharacterSize(16);
     lineDifference.setFillColor(sf::Color::White);
     lineDifference.setPosition(20.0f, 120.0f);
-    lineDifference.setString("Diff: " + fmt(dataLayer.debug.lineDifference));
-    
-    // zRate
-    zRate.setCharacterSize(16);
-    zRate.setFillColor(sf::Color::White);
-    zRate.setPosition(20.0f, 145.0f);
-    zRate.setString("Z: " + fmt(dataLayer.debug.zRate));
-
-    // PID Results
-    PIDResult.setCharacterSize(16);
-    PIDResult.setFillColor(sf::Color::White);
-    PIDResult.setPosition(20.0f, 170.0f);
-    PIDResult.setString("PID: " + fmt(dataLayer.debug.PIDResult));
+    lineDifference.setString("Diff: " + fmt(debug.RansacLines.leftLine.b - debug.RansacLines.rightLine.b));
 
     // Current state
     state.setCharacterSize(16);
     state.setFillColor(sf::Color::Blue);
-	state.setPosition(20.0f, 195.0f);
-	state.setString("State: " + std::string(StateToString(dataLayer.debug.state))); 
-    
+	state.setPosition(20.0f, 145.0f);
+	state.setString("State: " + std::string(StateToString(debug.state)));
 
+    // Local Waypoint
+    lWaypoint.setCharacterSize(16);
+    lWaypoint.setFillColor(sf::Color::Cyan);
+    lWaypoint.setPosition(20.0f, 170.0f);
+    lWaypoint.setString("Local WP: " + fmt(debug.lWaypoint.x) + ", " + fmt(debug.lWaypoint.y));
 
-    sf::Text waypoint;
-    waypoint.setFont(font);
-    waypoint.setCharacterSize(16);
-    waypoint.setFillColor(sf::Color::Cyan);
-    waypoint.setPosition(20.0f, 245.0f);
-    waypoint.setString("WP: " + fmt(dataLayer.debug.waypoint.x) + ", " + fmt(dataLayer.debug.waypoint.y));
-    
-    
-    
+    // Global Waypoint
+    gWaypoint.setCharacterSize(16);
+    gWaypoint.setFillColor(sf::Color::Cyan);
+    gWaypoint.setPosition(20.0f, 195.0f);
+    gWaypoint.setString("Global WP: " + fmt(debug.gWaypoint.x) + ", " + fmt(debug.gWaypoint.y));
+
     window.draw(leftPWM);
     window.draw(rightPWM);
     window.draw(leftDistance);
 	window.draw(rightDistance);
     window.draw(lineDifference);
-    window.draw(zRate);
-    window.draw(PIDResult);
 	window.draw(state);
-    window.draw(waypoint);
+    window.draw(lWaypoint);
+    window.draw(gWaypoint);
 	window.setView(worldView);
 }
 

@@ -15,18 +15,33 @@ void Lidar::SetConfig(int rays, float maxDist) {
 LidarData Lidar::GetScan(const pose& p, const std::vector<Obstacle>& obstacle) {
     LidarData data;
     std::vector<Obstacle> nearby = CheckObstacles(p, obstacle);
-    
-    float angleStep = 1 * (2.0f * M_PI) / numofRays;
+
+    float angleStep = (2.0f * M_PI) / numofRays;
 
     for (int i = 0; i < numofRays; i++) {
-        // Passes data as radians with ccw as postive.
-        float angle = p.theta + i * angleStep;
-        // Normalize data if its ever above or below 360 degrees.
-		// I dont think it will ever be below but im just being safe.
-        if (angle > (2.0f * M_PI)) { angle -= 2.0f * M_PI; }
-		if (angle < 0.0f) { angle += 2.0f * M_PI; }
-        data.points[i].angle = angle;
-        data.points[i].distance = CastRay(p, nearby, data.points[i].angle);
+        // World-frame angle for ray casting (radians, CCW positive)
+        float worldAngle = p.theta - i * angleStep;
+        if (worldAngle > (2.0f * M_PI)) { worldAngle -= 2.0f * M_PI; }
+        if (worldAngle < 0.0f)          { worldAngle += 2.0f * M_PI; }
+
+        // Convert to degrees
+        float robotAngleDeg = i * angleStep * (180.0f / M_PI);
+
+        float dist = CastRay(p, nearby, worldAngle);
+
+        data.points[i].angle    = robotAngleDeg;
+        data.points[i].distance = (uint16_t)dist;
+
+        if (dist < maxDistance) {
+            // Ray hit an obstacle — mark as a valid return
+            data.points[i].quality = 10;
+            data.points[i].valid   = true;
+        } else {
+            // No return — filter out so RANSAC ignores it
+            data.points[i].quality  = 0;
+            data.points[i].valid    = false;
+            data.points[i].distance = 0;
+        }
     }
 	data.count = numofRays;
 	return data;

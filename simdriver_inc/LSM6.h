@@ -34,11 +34,7 @@ public:
     // Here we just write a small constant into g.z so the gyro path
     // in the sketch runs rather than always seeing zero.
     void read() {
-		if (ArduinoCompat::g_dataLayer) {
-			g.z = (int16_t)ArduinoCompat::g_dataLayer->imu.gyroZ;
-		} else {
-			g.z = 0;
-		}
+        g.z = ArduinoCompat::g_gyroZ ? (int16_t)*ArduinoCompat::g_gyroZ : 0;
         g.x = 0;
         g.y = 0;
         a.x = 0;

@@ -121,6 +121,9 @@ void StateMachine::RunManual() {}
 // AutoDrive Control Code
 void StateMachine::RunAuto() {
 
+    // Update lidar every loop so scanComplete is always set (required by robot.cpp's wait loop)
+    perception.UpdateFilteredLidar();
+
     // Have state detection run alittle slower
     if (millis() - lastDetectionTime > STATEDETECTION_DELAY) {
         StateMachine::StateDetection();
@@ -159,8 +162,6 @@ void StateMachine::RunAuto() {
 
 void StateMachine::InbetweenRows() {
 
-    perception.UpdateFilteredLidar();
-    
     perception.UpdateRANSAC();
 
     perception.GenerateWaypoint();
@@ -169,44 +170,12 @@ void StateMachine::InbetweenRows() {
 
     GenerateGlobalWaypoint();
 
-    control.UpdateControl(
-        perception.GetLocalWaypoint(),  // from RANSAC — preferred
-        globalWaypoints[waypointIndex], // fallback when RANSAC loses lines
-        robotPose.GetCurrentPose());
+    control.UpdateControl(perception.GetLocalWaypoint(), globalWaypoints[waypointIndex], robotPose.GetCurrentPose());
     
-    motorControl.AutoForward(control.GetLeftPWM(), control.GetRightPWM());
+    motorControl.AutoForward(control.GetMotorCommands().leftMotor.PWM, control.GetMotorCommands().rightMotor.PWM);
 
     // Somewhere in here is where you recieve spray commands from Raspberry Pi
 
-    #ifdef SIM
-    if (ArduinoCompat::g_dataLayer) {
-        DataLayer& dl = *ArduinoCompat::g_dataLayer;
-        dl.debug.leftValid    = perception.LeftLineValid();
-        dl.debug.rightValid   = perception.RightLineValid();
-
-        dl.debug.leftLine.m      = perception.GetLeftRansac().m;
-        dl.debug.leftLine.b      = perception.GetLeftRansac().b;
-        dl.debug.leftLine.inliers= perception.GetLeftRansac().inliers;
-        dl.debug.leftLine.valid  = perception.GetLeftRansac().valid;
-
-        dl.debug.rightLine.m      = perception.GetRightRansac().m;
-        dl.debug.rightLine.b      = perception.GetRightRansac().b;
-        dl.debug.rightLine.inliers= perception.GetRightRansac().inliers;
-        dl.debug.rightLine.valid  = perception.GetRightRansac().valid;
-
-
-        dl.debug.waypoint.x = GetGlobalWaypoint(waypointIndex).x;
-        dl.debug.waypoint.y = GetGlobalWaypoint(waypointIndex).y;
-
-        dl.debug.PIDResult    = control.GetAngle();
-
-        dl.debug.state        = (int)sState;
-
-        dl.leftMotor.PWM = control.GetLeftPWM();
-        dl.rightMotor.PWM = control.GetRightPWM();
-        
-    }
-    #endif
 
 
 }
@@ -214,27 +183,30 @@ void StateMachine::InbetweenRows() {
 // This needs some work
 void StateMachine::GenerateGlobalWaypoint() {
     
-    if (waypoint_OldTimer - millis() > WAYPOINT_TIMER) {
+    if (millis() - waypoint_OldTimer > WAYPOINT_TIMER) {
         waypoint_OldTimer = millis();
-        if (waypointIndex <= MAX_WAYPOINTS) {
+        if (waypointIndex < MAX_WAYPOINTS - 1) {
             waypointIndex++;
         } else {
             waypointIndex = 0;
         }
-    
-    
+
+
         Waypoint localWaypoint = perception.GetLocalWaypoint();
         Pose pose = robotPose.GetCurrentPose();
 
-        globalWaypoints[waypointIndex].x = localWaypoint.x + pose.x;
-        globalWaypoints[waypointIndex].y = localWaypoint.y + pose.y;
+        // CW RANSAC transform: +x=rightward, forward=-y, localWaypoint.y stored as positive forward magnitude
+        float wx =  sinf(pose.theta) * localWaypoint.x + cosf(pose.theta) * localWaypoint.y;
+        float wy = -cosf(pose.theta) * localWaypoint.x + sinf(pose.theta) * localWaypoint.y;
+
+        globalWaypoints[waypointIndex].x = wx + pose.x;
+        globalWaypoints[waypointIndex].y = wy + pose.y;
+        globalWaypoints[waypointIndex].valid = true;
     }
 }
 
 void StateMachine::EndofRow() {
-    // Pointer to ScanData
-    // IMU/GPS Fusion
-    // Find End of Row
+
     // Pass End of Row by z amount
     // Detect which side row is on (use leftRow and rightRow?)
     // Turn towards next row using constant radius turn with row edge as reference
@@ -259,35 +231,6 @@ void StateMachine::CollisionAvoidance() {
 
 }
 
-void StateMachine::StateDetection() {
-    // Pointer to ScanData
-    // IMU/GPS Fusion
-    // Map Building
-    // Sanity Checks
-    // State Transition Logic
-        //Start
-            //
-        //Inbetween Rows
-            //
-        //End of Row
-            //
-
-    switch (sState) {
-
-        case INBETWEEN_ROWS:
-            if (!perception.LeftLineValid() && !perception.RightLineValid()) {
-                noLineCounter++;
-            } else {
-                noLineCounter = 0;
-            }
-            if (noLineCounter >= 5) {
-                TransitionTo(END_OF_ROW);
-            }
-            break;
-        default:
-            break;
-        }
-}
 
 void StateMachine::TransitionTo(SubState newState) {
     
@@ -304,9 +247,50 @@ bool StateMachine::InbetweenRowCondition() {
 
 bool StateMachine::EndOfRowCondition() {
     // Logic to determine if at end of row
+    uint8_t rowState = perception.CheckRows();
+        
+    if (rowState == 1 || rowState == 2 || rowState == 3) {
+        noLineCounter++;
+    
+    } else {
+    
+        noLineCounter = 0;
+    
+    }
+
+    if (noLineCounter >= 5) {
+    
+        return true;
+    
+    } else {
+    
+        return false;
+    
+    }
+}
+
+bool StateMachine::TurningCondition() {
     return false;
 }
 
+void StateMachine::StateDetection() {
+
+
+    switch (sState) {
+
+        case INBETWEEN_ROWS:
+            if (EndOfRowCondition()) {
+                TransitionTo(END_OF_ROW);
+            }
+            break;
+        case END_OF_ROW:
+            if (TurningCondition()) {
+                TransitionTo(TURNING);
+            }
+        default:
+            break;
+        }
+}
 
 void StateMachine::ResetAll() {
     // Reset all variables and states
@@ -321,3 +305,18 @@ void StateMachine::ResetManual() {
 }
 
 
+#ifdef SIM
+Debug StateMachine::GetDebug() {
+    Debug debug;
+    
+    // Motor commands
+    debug.motor = ArduinoCompat::g_dataLayer->motor;
+    debug.RansacLines = perception.GetRowData();
+    debug.assumedPose = robotPose.GetCurrentPose();
+    debug.lWaypoint = perception.GetLocalWaypoint();
+    uint8_t idx = GetWaypointIndex();
+    debug.gWaypoint = GetGlobalWaypoint(idx);
+    debug.state = (int)sState;
+    return debug;
+}
+#endif

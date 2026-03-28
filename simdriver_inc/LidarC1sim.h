@@ -5,8 +5,8 @@
 #include <Arduino.h>
 #else
 #include "inocompat.h"
-#include "RPLidarC1sim.h"
 #endif
+
 
 #include <cstdint>
 #include "datastructs.h"
@@ -54,9 +54,6 @@ class LidarC1 {
         uint32_t        TCMD          = 0;
         bool            Scanning      = false;
 
-        #ifdef SIM
-        RPLidarC1 simLidar; // reads from DataLayer instead of serial
-        #endif
 };
 
 #endif

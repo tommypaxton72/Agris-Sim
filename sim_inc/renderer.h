@@ -4,7 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include "world.h"      // gets Robot, Obstacles, pose for free
 #include "types.h"
-#include "datalayer.h"
+#include "datastructs.h"
 
 class Renderer {
 public:
@@ -28,10 +28,9 @@ private:
 	// Store world dimensions so we can recalculate the view on any resize
     float worldW = 0.0f;
     float worldH = 0.0f;
-	void DrawRANSACLine(const pose& p, const RANSACLine& line, sf::Color color);
-    // Called whenever window size changes to recompute letterbox viewport
+	void DrawRANSACLine(const pose& p, const RansacLine& line, sf::Color color);
     void UpdateView(unsigned int windowW, unsigned int windowH);
-	void DrawData(const DataLayer& dataLayer);
+	void DrawData(const Debug& debug);
     };
 
 
