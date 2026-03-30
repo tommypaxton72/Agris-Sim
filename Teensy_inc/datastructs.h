@@ -8,6 +8,26 @@
 #include <cstdint>
 #include "Config.h"
 
+/*
+
+*/
+
+enum MainState {
+    AutoDrive,
+    ManualDrive
+};
+
+// Do we need enum class or enum?
+enum SubState {
+    START,
+    INBETWEEN_ROWS,
+    END_OF_ROW,
+    TURNING,
+    ALIGNING,
+    ESTOP,
+    COLLISION_AVOIDANCE
+};
+
 // Lidar
 struct LidarPoint {
     uint16_t timeStamp = 0;
@@ -19,8 +39,8 @@ struct LidarPoint {
 
 struct LidarData {
     LidarPoint points[MAX_LIDAR_POINTS];
-    uint32_t time;
-    uint16_t count;
+    uint32_t time = 0;
+    uint16_t count = 0;
 
     #ifdef SIM
     bool scanComplete = false;
@@ -58,7 +78,10 @@ struct Row {
 struct Pose {
     float x = 0.0f;
     float y = 0.0f;
-    float theta = 0.0f;;
+    float z = 0.0f;     // Not really needed
+    float psi = 0.0f;   // Right now everything is sorta linked to theta but might change it all to psi
+    float theta = 0.0f;
+    float phi = 0.0f;
     float velocity = 0.0f;
 };
 
@@ -89,8 +112,10 @@ struct Debug {
     MotorCommands motor;
     Pose assumedPose;
     Row RansacLines;
+    RansacLine lineEOR;
     Waypoint lWaypoint;
-    Waypoint gWaypoint;
+    uint8_t currentWaypointIndex;
+    Waypoint gWaypoint[MAX_WAYPOINTS];
     int state = 0;
 };
 #endif

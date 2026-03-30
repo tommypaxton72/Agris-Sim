@@ -24,7 +24,7 @@ class World {
 	const std::vector<Obstacle>& GetObstacles() const { return obs.GetObstacles(); };
 	const WorldSize& GetWorldSize() const { return worldSize; };
     const LidarData& GetLidarData() const { return robot.GetLidarData(); };
-	const RansacLine& GetRightLine() const { return robot.GetRightLine(); };
+	const RansacLine& GetRightLine() const { return robot.GetRightLine(); }; // Can probably remove this with debug
     const RansacLine& GetLeftLine()  const { return robot.GetLeftLine(); };
     const float& GetLeftVel()  const { return robot.GetLeftVel(); };
     const float& GetRightVel() const { return robot.GetRightVel(); };

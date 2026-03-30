@@ -16,6 +16,8 @@ struct LogEntry {
     int state;
     bool leftValid  = false;
     bool rightValid = false;
+    Row row;
+    RansacLine EORLine;
     Waypoint lWaypoint;
     Waypoint gWaypoint;
 };

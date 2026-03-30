@@ -22,13 +22,23 @@ struct Debug;
 struct LidarData;
 
 namespace ArduinoCompat {
-    inline Debug*     g_dataLayer = nullptr;   // firmware motor outputs
-    inline LidarData* g_lidarData = nullptr;   // LidarC1sim reads scan data
-    inline float*     g_gyroZ     = nullptr;   // LSM6 reads gyro Z
+    inline Debug*     g_dataLayer       = nullptr;   // firmware motor outputs
+    inline LidarData* g_lidarData       = nullptr;   // LidarC1sim reads scan data
+    inline float*     g_gyroZ           = nullptr;   // LSM6 reads gyro Z
+    inline float*     g_compassHeading  = nullptr;   // QMC5883LCompass / LIS3MDL reads heading (degrees)
+    inline float*     g_gpsLat          = nullptr;   // GPS latitude  (degrees, WGS-84)
+    inline float*     g_gpsLon          = nullptr;   // GPS longitude (degrees, WGS-84)
+    inline float*     g_simX            = nullptr;   // Sim ground-truth pose X
+    inline float*     g_simY            = nullptr;   // Sim ground-truth pose Y
+    inline float*     g_simTheta        = nullptr;   // Sim ground-truth pose theta
 
-    inline void SetDataLayer(Debug* d)     { g_dataLayer = d; }
-    inline void SetLidarData(LidarData* l) { g_lidarData = l; }
-    inline void SetGyroZ(float* g)         { g_gyroZ = g; }
+    inline void SetDataLayer(Debug* d)      { g_dataLayer      = d; }
+    inline void SetLidarData(LidarData* l)  { g_lidarData      = l; }
+    inline void SetGyroZ(float* g)          { g_gyroZ          = g; }
+    inline void SetCompassHeading(float* h) { g_compassHeading = h; }
+    inline void SetGPSLat(float* lat)       { g_gpsLat         = lat; }
+    inline void SetGPSLon(float* lon)       { g_gpsLon         = lon; }
+    inline void SetSimPose(float* x, float* y, float* theta) { g_simX = x; g_simY = y; g_simTheta = theta; }
 }
 
 // ---------------------------------------------------------------------------

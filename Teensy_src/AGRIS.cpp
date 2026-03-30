@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include "AGRIS.h"
 
 // Deadzones and Max Speed

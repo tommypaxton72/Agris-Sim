@@ -2,7 +2,9 @@
 
 // Notes
 // Need to test if ransac tries to output a line of a row behind.
-
+// Might want to convert
+// Need to update names for RANSAC/Ransac I used both...
+// Need to look through all implementation there is a lot of double filtering going on
 
 // RANSAC implementation
 RANSAC::RANSAC() {}
@@ -13,8 +15,8 @@ Row RANSAC::RunRansac(const LidarData& lidar) {
 
     SeperatedPoints rows = SeperatePoints(lidar);
     
-    row.leftLine = RunRANSACOnRow(rows.leftPoints);
-    row.rightLine = RunRANSACOnRow(rows.rightPoints);
+    row.leftLine = RunRansacOnRow(rows.leftPoints);
+    row.rightLine = RunRansacOnRow(rows.rightPoints);
     
     // At some point we should maybe validate the lines to make sure they are reasonable
 
@@ -23,8 +25,16 @@ Row RANSAC::RunRansac(const LidarData& lidar) {
 
 }
 
+// Single Line Ransac implementation
+RansacLine RANSAC::EndOfRowRansac(const LidarData& lidar) {
+    // Convert polar to rect
+    rowPoints points = ConvertToRect(lidar);
+    
+    return RunRansacOnRow(points);
+
+}
 // RANSAC on a single row of points
-RansacLine RANSAC::RunRANSACOnRow(const rowPoints& points) {
+RansacLine RANSAC::RunRansacOnRow(const rowPoints& points) {
     if (points.count < 2) {
         return RansacLine{0, 0, 0, false};
     }
@@ -51,6 +61,22 @@ RansacLine RANSAC::RunRANSACOnRow(const rowPoints& points) {
         }
     }
     return bestLine;
+}
+
+// Takes in Lidar Data struct and converts from polar coords to rectangular
+rowPoints RANSAC::ConvertToRect(const LidarData& lidar) {
+    rowPoints points;
+
+    for (uint16_t i = 0; i < lidar.count; i++) {
+        float sin = sinf(lidar.points[i].angle);
+        float cos = cosf(lidar.points[i].angle);
+
+        points.x[i] = lidar.points[i].distance * cos;
+        points.y[i] = lidar.points[i].distance * sin;
+        
+    }
+    points.count = lidar.count;
+    return points;
 }
 
 // Fits line with given points

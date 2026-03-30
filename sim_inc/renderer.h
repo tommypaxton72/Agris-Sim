@@ -29,6 +29,7 @@ private:
     float worldW = 0.0f;
     float worldH = 0.0f;
 	void DrawRANSACLine(const pose& p, const RansacLine& line, sf::Color color);
+    void DrawWaypoints(const Debug& debug);
     void UpdateView(unsigned int windowW, unsigned int windowH);
 	void DrawData(const Debug& debug);
     };

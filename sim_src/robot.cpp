@@ -35,10 +35,12 @@ void Robot::LoadConfig() {
     ArduinoCompat::SetDataLayer(&debug);
     ArduinoCompat::SetLidarData(&lidarData);
     ArduinoCompat::SetGyroZ(&gyroZ);
+    ArduinoCompat::SetSimPose(&p.x, &p.y, &p.theta);
     setup();
     ArduinoCompat::SetDataLayer(nullptr);
     ArduinoCompat::SetLidarData(nullptr);
     ArduinoCompat::SetGyroZ(nullptr);
+    ArduinoCompat::SetSimPose(nullptr, nullptr, nullptr);
 
     logger.OpenFile("log.csv");
 }
@@ -52,6 +54,7 @@ void Robot::UpdateControl() {
     ArduinoCompat::SetDataLayer(&debug);
     ArduinoCompat::SetLidarData(&lidarData);
     ArduinoCompat::SetGyroZ(&gyroZ);
+    ArduinoCompat::SetSimPose(&p.x, &p.y, &p.theta);
 
     while (!lidarData.scanComplete) {
         loop();
@@ -60,6 +63,7 @@ void Robot::UpdateControl() {
     ArduinoCompat::SetDataLayer(nullptr);
     ArduinoCompat::SetLidarData(nullptr);
     ArduinoCompat::SetGyroZ(nullptr);
+    ArduinoCompat::SetSimPose(nullptr, nullptr, nullptr);
 }
 
 void Robot::UpdateLog() {

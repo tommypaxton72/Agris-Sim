@@ -1,0 +1,26 @@
+#+Title: AgrisNav Notes/To Do
+
+* Notes
+** Pure pursuit -> PID -> Motor Control
+Have pure pursuit output desired heading.
+Desired heading is then passed into PID getting error = desired - actual heading.
+** State Machine storage
+rowWidth = the accumulated average of ransac line difference.
+** Architecture issues
+Not sure what classes should own what. Right now I have most things owned by pose and perception and then state machine gets them.
+
+* To-do list
+** TODO Move includes to be more appropriate.
+** TODO Add Doxygen style comments to top of files?
+** TODO Add better comments through out code.
+** TODO Write pose implementation.
+** TODO Write pathfinder.h implementation.
+** TODO Get more familiar with the provided IMU and compass libraries.
+** TODO Write Sim layer for IMU and compass libraries.
+** DONE Add member variable for storing estimated row width.
+** TODO Find more elegant way for way point storage.
+** TODO Store more ransac lines for iterating on.
+** TODO Come up with ring buffer implementation to use in various places.
+** TODO Fix waypoint plotting on sim.
+
+#  LocalWords:  rowWidth

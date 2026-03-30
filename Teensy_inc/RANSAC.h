@@ -13,6 +13,10 @@
 #include "datastructs.h"
 #include "Config.h"
 
+/*
+
+*/
+
 // This needs some looking at
 
 struct rowPoints {
@@ -31,9 +35,11 @@ class RANSAC {
     public:
         RANSAC();
         Row RunRansac(const LidarData& lidar);
+        RansacLine EndOfRowRansac(const LidarData& lidar);
     private:
-        RansacLine RunRANSACOnRow(const rowPoints& points);
+        RansacLine RunRansacOnRow(const rowPoints& points);
         float CalcDistanceSq(const RansacLine& l, const Point& p);
+        rowPoints ConvertToRect(const LidarData& lidar);
         SeperatedPoints SeperatePoints(const LidarData& lidar);
         RansacLine FitLine(const Point& p1, const Point& p2);
         uint16_t CountInliers(const RansacLine& testLine, const rowPoints& row);

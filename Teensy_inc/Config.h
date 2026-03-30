@@ -36,17 +36,22 @@
 #define ROW_BUFFER_SIZE 2 // Not really implemented yet but evenutally for a circular buffer for RANSAC lines
 #define RANSAC_SLOPE_CHANGE_THRESHOLD 0.5f // Thresholdo of slope change for ransac lines to stay valid
 #define MINIMUM_LIDAR_QUALITY 2 // Minimum lidar quality that is accepted
-#define MAX_WAYPOINTS 5 // Max number of global stored waypoints
+#define MAX_WAYPOINTS 50 // Max number of global stored waypoints
 #define NUM_OF_HITS 10 // Number of hits before a row is not detected
-
+#define MIN_NUM_OF_REAR_POINTS 10 // Number of rearward looking points to determine end of row
+#define ROW_WIDTH_ESTIMATE 762 // Initial estimate for row width to be iterated on as ransac lines are generated
 // CONTROL
 #define WHEELBASE_MM 279.4f   // Wheel to Wheel distance for pure pursuit calculations
 #define CRUISE_SPEED 120 // PWM for straight forward speed
-
+#define TURN_SPEED 80 // PWM for turning speed
+#define ALIGNING_SPEED 80
 //STATE MACHINE
 #define STATEDETECTION_DELAY 250 // Time between StateDetection runs
 #define WAYPOINT_TIMER 1000 // Time between stored global waypoints.
 
+
+// Test
+#define EOR_LOOKAHEAD 1000
 
 
 #endif

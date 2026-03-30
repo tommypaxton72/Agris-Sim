@@ -65,6 +65,7 @@ void StateMachine::Run() {
 
 #ifndef SIM
 // Manual Control Code
+// Would like to be able to set first End of Row turn direction with manual control
 void StateMachine::RunManual() {
     // Manual Motor Control
     if (agvrx.Output.LWForward > 0 && agvrx.Output.LWReverse == 0) {
@@ -118,22 +119,20 @@ void StateMachine::RunManual() {
 void StateMachine::RunManual() {}
 #endif
 
+
 // AutoDrive Control Code
 void StateMachine::RunAuto() {
 
-    // Update lidar every loop so scanComplete is always set (required by robot.cpp's wait loop)
+    
     perception.UpdateFilteredLidar();
 
-    // Have state detection run alittle slower
-    if (millis() - lastDetectionTime > STATEDETECTION_DELAY) {
-        StateMachine::StateDetection();
-        lastDetectionTime = millis();
-    }
-    
+    // Check collision
     if (perception.CheckCollision()) {
         sState = COLLISION_AVOIDANCE;
     }
     
+
+
     switch (sState) {
         case START:
             // Need to add an actual start condition
@@ -148,6 +147,14 @@ void StateMachine::RunAuto() {
             EndofRow();
             break;
 
+        case ALIGNING:
+            Aligning();
+            break;
+
+        case TURNING:
+            Turning();
+            break;
+
         case COLLISION_AVOIDANCE:
             CollisionAvoidance();
             break;
@@ -160,25 +167,6 @@ void StateMachine::RunAuto() {
     }
 }
 
-void StateMachine::InbetweenRows() {
-
-    perception.UpdateRANSAC();
-
-    perception.GenerateWaypoint();
-
-    robotPose.UpdatePose();
-
-    GenerateGlobalWaypoint();
-
-    control.UpdateControl(perception.GetLocalWaypoint(), globalWaypoints[waypointIndex], robotPose.GetCurrentPose());
-    
-    motorControl.AutoForward(control.GetMotorCommands().leftMotor.PWM, control.GetMotorCommands().rightMotor.PWM);
-
-    // Somewhere in here is where you recieve spray commands from Raspberry Pi
-
-
-
-}
 
 // This needs some work
 void StateMachine::GenerateGlobalWaypoint() {
@@ -202,27 +190,121 @@ void StateMachine::GenerateGlobalWaypoint() {
         globalWaypoints[waypointIndex].x = wx + pose.x;
         globalWaypoints[waypointIndex].y = wy + pose.y;
         globalWaypoints[waypointIndex].valid = true;
+
+
+        // Global waypoitns dont work quite right with the sim because even though its global waypoint its not set on the reference
+        // Frame of the world.
+        #ifdef SIM
+        std::cout << "[WP " << waypointIndex << "] x=" << globalWaypoints[waypointIndex].x
+                  << " y=" << globalWaypoints[waypointIndex].y
+                  << " localValid=" << localWaypoint.valid << "\n";
+        #endif
     }
 }
+
+// State Functions
+void StateMachine::InbetweenRows() {
+
+    perception.UpdateRANSAC();
+
+    perception.GenerateWaypoint();
+
+    robotPose.UpdatePose();
+
+    GenerateGlobalWaypoint();
+
+    control.UpdateControl(perception.GetLocalWaypoint(), globalWaypoints[waypointIndex], robotPose.GetCurrentPose());
+    
+    motorControl.AutoForward(control.GetMotorCommands().leftMotor.PWM, control.GetMotorCommands().rightMotor.PWM);
+
+    // Somewhere in here is where you recieve spray commands from Raspberry Pi
+
+    if (!EndOfRowCondition) {
+        TransitionTo(END_OF_ROW);
+    }
+
+}
+
+
+
 
 void StateMachine::EndofRow() {
 
     // Pass End of Row by z amount
     // Detect which side row is on (use leftRow and rightRow?)
     // Turn towards next row using constant radius turn with row edge as reference
+    
+    // Could also take lidar data and search behind for closest points and create ransac line 
+    //from that to get end of row line?
+    perception.UpdateFilteredLidar();
+    perception.SetLidarEndOfRow(10);
+    perception.SetEndOfRowLine();
+    RansacLine lineEOR = perception.GetEndOfRowLine();
+
+    #ifdef DEBUG
+    Serial.print("[EOR RANSAC] valid=");
+    Serial.print(lineEOR.valid);
+    Serial.print(" m=");
+    Serial.print(lineEOR.m);
+    Serial.print(" b=");
+    Serial.println(lineEOR.b);
+    #endif
+    // Could also get the lidar data from the closest points and determine distance 
+    // using angle and distance to get the rectangular distance from closest corn plants
+    
+    // I also like the idea of using old stored ransac lines to create last few waypoints?
+    // With the robot being so far out of the row im worried it might pick up other rows.
+    
+    // Get Distance of line from robot
+    // Line y = mx + b, b is where the 
+    Pose current = robotPose.GetCurrentPose();
+    float dx = current.x - EORPose.x;
+    float dy = current.y - EORPose.y;
+    
+    
+    if (TurningCondition()) {
+        TransitionTo(TURNING);
+    }
+
+}
+
+
+void StateMachine::Turning() {
+    robotPose.UpdatePose();
+    Pose pose = robotPose.GetCurrentPose();
+
+
+    if (!turnInitialized) {
+        startHeading = pose.theta;
+
+        TurnDirection dir = (turnRowCount % 2 == 0) ? TurnDirection::Right : TurnDirection::Left;
+        float sign = (dir == TurnDirection::Left) ? 1.0f : -1.0f;
+        targetHeading = startHeading + sign * 3.14159f;
+        control.SetTurnStart(startHeading);
+        turnInitialized = true;
+    }
+
+    TurnDirection dir = (turnRowCount % 2 == 0) ? TurnDirection::Right : TurnDirection::Left;
+    float rowDist = perception.GetAvgRowDistance();
+
+    control.UpdateTurn(rowDist, dir, pose);
+
+    motorControl.AutoForward(
+        control.GetMotorCommands().leftMotor.PWM,
+        control.GetMotorCommands().rightMotor.PWM
+    );
+    float test = control.GetHeadingProgress();
+    
+    if (AligningCondition()) {
+        TransitionTo(ALIGNING);
+    }
+}
+
+void StateMachine:: Aligning() {
     motorControl.Stop();
 }
 
-void StateMachine::Turning() {
-
-}
-
-void StateMachine:: Alignment() {
-
-}
-
 void StateMachine::CollisionAvoidance() {
-    // Pointer to ScanData
     // Find clear path to reverse to previous waypoint?
     // Maybe follow previous waypoints back 3
     // Stop
@@ -231,65 +313,61 @@ void StateMachine::CollisionAvoidance() {
 
 }
 
-
+// State transition function
 void StateMachine::TransitionTo(SubState newState) {
-    
+    if (newState == TURNING) {
+        turnInitialized = false;  // arm the one-time heading snapshot
+    }
+    if (sState == TURNING && newState != TURNING) {
+        turnRowCount++;            // alternate direction on next turn
+    }
     sState = newState;
-
 }
 
+// State Transition Logic
 bool StateMachine::InbetweenRowCondition() {
     // Logic to determine if inbetween rows
     return true;
-    // Need to figure out a way to test multiple cycles before determining
 
 }
 
 bool StateMachine::EndOfRowCondition() {
     // Logic to determine if at end of row
-    uint8_t rowState = perception.CheckRows();
+    if (sState == INBETWEEN_ROWS) {
+        uint8_t rowState = perception.CheckRows();
         
-    if (rowState == 1 || rowState == 2 || rowState == 3) {
-        noLineCounter++;
-    
-    } else {
-    
-        noLineCounter = 0;
-    
-    }
+        if (rowState == 1 || rowState == 2 || rowState == 3) {
+            noLineCounter++;
+        } else {
+            noLineCounter = 0;
+        }
+        if (noLineCounter >= 5) {
+            // Clean this up later and put it in its respective files.
+            EORWaypoint = robotPose.GetEORWaypoint();
+            EORPose = robotPose.GetCurrentPose();
 
-    if (noLineCounter >= 5) {
-    
-        return true;
-    
-    } else {
-    
-        return false;
-    
+            return true;
+            
+        } else {
+            return false;
+        }
     }
-}
-
-bool StateMachine::TurningCondition() {
     return false;
 }
 
-void StateMachine::StateDetection() {
+bool StateMachine::TurningCondition() {
+    if (sState == END_OF_ROW) {
+        Pose current = robotPose.GetCurrentPose();
+        float dx = current.x - EORPose.x;
+        float dy = current.y - EORPose.y;
+        float dist = sqrtf(dx*dx + dy*dy);
+        return dist >= EOR_LOOKAHEAD;
+    }
+    return false;
+}
 
-
-    switch (sState) {
-
-        case INBETWEEN_ROWS:
-            if (EndOfRowCondition()) {
-                TransitionTo(END_OF_ROW);
-            }
-            break;
-        case END_OF_ROW:
-            if (TurningCondition()) {
-                TransitionTo(TURNING);
-            }
-        default:
-            break;
-        }
+bool StateMachine::AligningCondition() {
+    // If compass heading 
 }
 
 void StateMachine::ResetAll() {
@@ -312,11 +390,15 @@ Debug StateMachine::GetDebug() {
     // Motor commands
     debug.motor = ArduinoCompat::g_dataLayer->motor;
     debug.RansacLines = perception.GetRowData();
+    debug.lineEOR = perception.GetEndOfRowLine();
     debug.assumedPose = robotPose.GetCurrentPose();
     debug.lWaypoint = perception.GetLocalWaypoint();
-    uint8_t idx = GetWaypointIndex();
-    debug.gWaypoint = GetGlobalWaypoint(idx);
+    debug.currentWaypointIndex = GetWaypointIndex();
+    for (int i = 0; i < MAX_WAYPOINTS; i++) {
+        debug.gWaypoint[i] = GetGlobalWaypoint(i);
+    }
     debug.state = (int)sState;
+
     return debug;
 }
 #endif

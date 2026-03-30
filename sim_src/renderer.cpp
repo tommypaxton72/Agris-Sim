@@ -71,6 +71,7 @@ void Renderer::PollEvents() {
 // Main draw call - clears, draws everything, displays
 void Renderer::Draw(const World& world) {
     const pose& p = world.GetRobotPose();
+    const Debug& db = world.GetDebug();
 	
     worldView.setCenter(p.x, p.y);
     window.setView(worldView);
@@ -84,20 +85,30 @@ void Renderer::Draw(const World& world) {
     }
 	// Draw RANSAC lines on top of everything else so they're always visible.
     // Green = valid line used for steering, red = invalid/not enough inliers.
+    switch (db.state) {
+        case 1: {
+            DrawRANSACLine(p, world.GetRightLine(),
+                world.GetRightLine().valid ? sf::Color(0, 255, 0, 200) : sf::Color(255, 0, 0, 120));
+            DrawRANSACLine(p, world.GetLeftLine(),
+                world.GetLeftLine().valid  ? sf::Color(0, 255, 0, 200) : sf::Color(255, 0, 0, 120));
+            break;
+            };
+        case 2: {
+            DrawRANSACLine(p, db.lineEOR,
+                db.lineEOR.valid ? sf::Color(255, 165, 0, 200) : sf::Color(255, 0, 0, 120));
+            break;
+        };
+        default:
+            break;
+    }
 
-    DrawRANSACLine(p, world.GetRightLine(),
-        world.GetRightLine().valid ? sf::Color(0, 255, 0, 200) : sf::Color(255, 0, 0, 120));
-    DrawRANSACLine(p, world.GetLeftLine(),
-        world.GetLeftLine().valid  ? sf::Color(0, 255, 0, 200) : sf::Color(255, 0, 0, 120));
-
-
-	DrawData(world.GetDebug());
+    DrawWaypoints(db);
+	DrawData(db);
 
     window.display();
 
+}
 
-    
-    }
 
 // Draw world boundary as a rectangle outline
 void Renderer::DrawWorld(const WorldSize& size) {
@@ -217,6 +228,7 @@ static const char* StateToString(int state) {
     }
 }
 
+// Might add timer to slow down the writing of data to hud
 void Renderer::DrawData(const Debug& debug) {
 	window.setView(window.getDefaultView());
 
@@ -290,7 +302,8 @@ void Renderer::DrawData(const Debug& debug) {
     gWaypoint.setCharacterSize(16);
     gWaypoint.setFillColor(sf::Color::Cyan);
     gWaypoint.setPosition(20.0f, 195.0f);
-    gWaypoint.setString("Global WP: " + fmt(debug.gWaypoint.x) + ", " + fmt(debug.gWaypoint.y));
+    const Waypoint& activeWP = debug.gWaypoint[debug.currentWaypointIndex];
+    gWaypoint.setString("Global WP: " + fmt(activeWP.x) + ", " + fmt(activeWP.y));
 
     window.draw(leftPWM);
     window.draw(rightPWM);
@@ -303,4 +316,17 @@ void Renderer::DrawData(const Debug& debug) {
 	window.setView(worldView);
 }
 
-
+void Renderer::DrawWaypoints(const Debug& debug) {
+    const float radius = 30.0f;
+    for (int i = 0; i < MAX_WAYPOINTS; i++) {
+        const Waypoint& wp = debug.gWaypoint[i];
+        if (!wp.valid) continue;
+        sf::CircleShape dot(radius);
+        dot.setOrigin(radius, radius);
+        dot.setPosition(wp.x, wp.y);
+        dot.setFillColor(i == debug.currentWaypointIndex
+            ? sf::Color(255, 255, 0, 220)
+            : sf::Color(0, 200, 255, 150));
+        window.draw(dot);
+    }
+}

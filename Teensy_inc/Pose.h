@@ -14,18 +14,23 @@
 #include <cstdint>
 #include "datastructs.h"
 
+/*
+
+*/
+
 class Position {
     public:
         Position();
 
         // Call every loop — reads all sensors and updates pose
         void UpdatePose();
-
+        void SetEORPose();
         // Getters
         const Pose& GetCurrentPose() const { return currentPose; };
-
+        Waypoint GetEORWaypoint();
     private:
         Pose currentPose;
+        Pose poseEOR;
 
 
         #ifndef SIM
@@ -62,6 +67,9 @@ class Position {
 
 
         float TicksToMM(int32_t ticks);
+        
+        
+
 };
 
 #endif

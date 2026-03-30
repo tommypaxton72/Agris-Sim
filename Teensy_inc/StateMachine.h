@@ -23,22 +23,13 @@
 #include "MotorControl.h"
 #include "PathFinder.h"
 
+/*
+================================ State Machine ==================================
 
-enum MainState {
-    AutoDrive,
-    ManualDrive
-};
+*/
 
-// Do we need enum class or enum?
-enum SubState {
-    START,
-    INBETWEEN_ROWS,
-    END_OF_ROW,
-    TURNING,
-    ALIGNING,
-    ESTOP,
-    COLLISION_AVOIDANCE
-};
+
+
 
 
 
@@ -61,6 +52,9 @@ class StateMachine {
         const Pose& GetCurrentPose() const { return robotPose.GetCurrentPose(); };
         
         const MotorCommands& GetMotorCommands() const { return control.GetMotorCommands(); };
+
+        // Setters
+        
 
         #ifdef SIM
         Debug GetDebug();
@@ -85,6 +79,15 @@ class StateMachine {
         uint8_t waypointIndex = 0;
         uint32_t waypoint_OldTimer = 0;
 
+        // Testing idea of keeping waypoint and other data for end of row.
+        Pose EORPose;
+        Waypoint EORWaypoint;
+
+        bool    turnInitialized = false;
+        float   startHeading    = 0.0f;
+        float   targetHeading   = 0.0f;
+        int     turnRowCount    = 0;
+
         void MainTransitionTo(MainState newState);
         void RunAuto();
         void RunManual();
@@ -96,13 +99,16 @@ class StateMachine {
         void EndofRow();
         void CollisionAvoidance();
         void Turning();
-        void Alignment();
+        void Aligning();
 
         void GenerateGlobalWaypoint();
 
         bool InbetweenRowCondition();
         bool EndOfRowCondition();
         bool TurningCondition();
+        bool AligningCondition();
+
+
 
         void ResetAll();
         void ResetAuto();

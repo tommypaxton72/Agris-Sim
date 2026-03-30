@@ -10,6 +10,10 @@
 #include <cstdint>
 #include "Config.h"
 
+/*
+
+*/
+
 struct AGRISController{
     uint8_t RSForward;
     uint8_t RSReverse;

@@ -11,12 +11,22 @@
 #include "datastructs.h"
 #include "Config.h"
 
+/*
+
+*/
+
 // Which waypoint source to use as the lookahead target
 // Local  — RANSAC generated, robot-relative, no transform needed
 // Global — world frame position, requires pose transform
 enum class WaypointMode {
     Local,   // use local waypoint from Perception directly
     Global   // use global waypoint, transform into robot frame first
+};
+
+// Turn direction for constant-radius headland turns
+enum class TurnDirection {
+    Left,    // CCW arc — inner=right motor, outer=left motor
+    Right    // CW arc  — inner=left motor,  outer=right motor
 };
 
 class PathFinder {
@@ -32,7 +42,6 @@ class PathFinder {
 
         // Getters
         const MotorCommands& GetMotorCommands() const { return motor; };
-
         // Steering angle in degrees — negative = left, positive = right
         // Derived from curvature, useful for logging and AutoForward compatibility
         float GetAngle() { return steeringAngle; };
@@ -40,10 +49,20 @@ class PathFinder {
         // Which waypoint source is currently active
         WaypointMode GetActiveMode() { return activeMode; };
 
+        
+
+
+        float GetHeadingProgress() const { return headingProgress; };
+
+
+        void SetTurnStart(float startHeadingRad) { turnStartHeading = startHeadingRad; };
+        void UpdateTurn(float rowDistance, TurnDirection dir, const Pose& pose);
     private:
         MotorCommands motor;
 
-        float steeringAngle  = 0.0f; // degrees
+        float steeringAngle    = 0.0f; // degrees
+        float headingProgress  = 0.0f; // radians swept since turn start
+        float turnStartHeading = 0.0f; // heading recorded at start of turn
         WaypointMode activeMode = WaypointMode::Local;
 
         // --- Waypoint selection ---
@@ -78,6 +97,9 @@ class PathFinder {
         // right = base * (1 + curvature * wheelbase/2)
         // Also derives steeringAngle from curvature for logging
         void CalcOutputs(float curvature);
+
+
+        void CalcConstRadiusTurn(float rowDistance, TurnDirection dir);
 };
 
 #endif

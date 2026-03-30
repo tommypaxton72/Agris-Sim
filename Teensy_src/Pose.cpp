@@ -17,6 +17,13 @@ static const float GPS_WEIGHT           = 0.3f;
 Position::Position() {}
 
 void Position::UpdatePose() {
+    #ifdef SIM
+    if (ArduinoCompat::g_simX)     currentPose.x     = *ArduinoCompat::g_simX;
+    if (ArduinoCompat::g_simY)     currentPose.y     = *ArduinoCompat::g_simY;
+    if (ArduinoCompat::g_simTheta) currentPose.theta = *ArduinoCompat::g_simTheta;
+    return;
+    #endif
+
     // Calculate time delta in seconds since last update
     uint32_t now = millis();
     float dt = (now - lastUpdateTime) / 1000.0f;
@@ -141,4 +148,14 @@ float Position::TicksToMM(int32_t ticks) {
     return ((float)ticks / TICKS_PER_REV) * WHEEL_CIRCUMFERENCE;
 }
 
+void Position::SetEORPose() {
+    poseEOR =  currentPose;
+}
+
+Waypoint Position::GetEORWaypoint() {
+    Waypoint EORWaypoint;
+    EORWaypoint.x = EOR_LOOKAHEAD * sin(currentPose.theta);
+    EORWaypoint.y = EOR_LOOKAHEAD * cos(currentPose.theta);
+    return EORWaypoint;
+}
 

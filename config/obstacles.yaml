@@ -83,3 +83,45 @@ obstacles:
   - { x: 8600,  y: 3380, radius: 38 }
   - { x: 8800,  y: 3397, radius: 42 }
   - { x: 9000,  y: 3384, radius: 40 }
+  # --- FAR LEFT ROW --- y = 2200, same x range, 1200mm from LEFT ROW
+  - { x: 1000,  y: 2200, radius: 41 }
+  - { x: 1200,  y: 2188, radius: 38 }
+  - { x: 1400,  y: 2204, radius: 43 }
+  - { x: 1600,  y: 2192, radius: 40 }
+  - { x: 1800,  y: 2182, radius: 37 }
+  - { x: 2000,  y: 2206, radius: 44 }
+  - { x: 2200,  y: 2190, radius: 36 }
+  - { x: 2400,  y: 2199, radius: 42 }
+  - { x: 2600,  y: 2184, radius: 39 }
+  - { x: 2800,  y: 2202, radius: 45 }
+  - { x: 3000,  y: 2188, radius: 38 }
+  - { x: 3200,  y: 2205, radius: 41 }
+  - { x: 3400,  y: 2182, radius: 40 }
+  - { x: 3600,  y: 2197, radius: 37 }
+  - { x: 3800,  y: 2186, radius: 43 }
+  - { x: 4000,  y: 2204, radius: 36 }
+  - { x: 4200,  y: 2192, radius: 44 }
+  - { x: 4400,  y: 2180, radius: 40 }
+  - { x: 4600,  y: 2202, radius: 38 }
+  - { x: 4800,  y: 2187, radius: 42 }
+  - { x: 5000,  y: 2205, radius: 39 }
+  - { x: 5200,  y: 2184, radius: 45 }
+  - { x: 5400,  y: 2198, radius: 41 }
+  - { x: 5600,  y: 2204, radius: 37 }
+  - { x: 5800,  y: 2182, radius: 43 }
+  - { x: 6000,  y: 2194, radius: 36 }
+  - { x: 6200,  y: 2188, radius: 40 }
+  - { x: 6400,  y: 2206, radius: 44 }
+  - { x: 6600,  y: 2184, radius: 38 }
+  - { x: 6800,  y: 2199, radius: 42 }
+  - { x: 7000,  y: 2182, radius: 39 }
+  - { x: 7200,  y: 2204, radius: 45 }
+  - { x: 7400,  y: 2190, radius: 40 }
+  - { x: 7600,  y: 2202, radius: 37 }
+  - { x: 7800,  y: 2184, radius: 43 }
+  - { x: 8000,  y: 2197, radius: 36 }
+  - { x: 8200,  y: 2188, radius: 41 }
+  - { x: 8400,  y: 2205, radius: 44 }
+  - { x: 8600,  y: 2182, radius: 38 }
+  - { x: 8800,  y: 2199, radius: 42 }
+  - { x: 9000,  y: 2186, radius: 40 }

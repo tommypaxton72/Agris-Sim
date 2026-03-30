@@ -115,3 +115,30 @@ void PathFinder::CalcOutputs(float curvature) {
     motor.leftMotor.PWM  = (uint8_t)constrain(left,  0.0f, 255.0f);
     motor.rightMotor.PWM = (uint8_t)constrain(right, 0.0f, 255.0f);
 }
+
+void PathFinder::CalcConstRadiusTurn(float rowDistance, TurnDirection dir) {
+    float radius = rowDistance / 2.0f;
+
+    
+    float outerPWM = constrain(TURN_SPEED * (1.0f + HALF_WHEELBASE / radius), 0.0f, 255.0f);
+    float innerPWM = constrain(TURN_SPEED * (1.0f - HALF_WHEELBASE / radius), 0.0f, 255.0f);
+
+    if (dir == TurnDirection::Right) {
+        motor.leftMotor.PWM  = (uint8_t)outerPWM;
+        motor.rightMotor.PWM = (uint8_t)innerPWM;
+    } else {
+        motor.leftMotor.PWM  = (uint8_t)innerPWM;
+        motor.rightMotor.PWM = (uint8_t)outerPWM;
+    }
+}
+
+void PathFinder::UpdateTurn(float rowDistance, TurnDirection dir, const Pose& pose) {
+    CalcConstRadiusTurn(rowDistance, dir);
+
+
+    float delta = pose.theta - turnStartHeading;
+
+    while (delta >  3.14159f) delta -= 2.0f * 3.14159f;
+    while (delta < -3.14159f) delta += 2.0f * 3.14159f;
+    headingProgress = delta;
+}

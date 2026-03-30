@@ -11,9 +11,11 @@ void Logger::OpenFile(const std::string& filename) {
 
     file << "timestamp,x,y,theta,"
          << "leftPWM,rightPWM,"
+         << "leftSlope,rightSlope,"
          << "leftDistance,rightDistance,"
          << "lineDifference,state,"
          << "leftValid,rightValid,"
+         << "EORSlope,EORIntercept,"
          << "lWaypointX,lWaypointY,"
          << "gWaypointX,gWaypointY\n";
 
@@ -37,14 +39,15 @@ void Logger::LogData(const pose& p, const Debug& debug) {
     entry.leftDistance  = debug.RansacLines.leftLine.b;
     entry.rightDistance = debug.RansacLines.rightLine.b;
     entry.lineDifference = debug.RansacLines.leftLine.b + debug.RansacLines.rightLine.b;
-
+    entry.row = debug.RansacLines;
+    entry.EORLine = debug.lineEOR;
     entry.state = debug.state;
 
     entry.leftValid  = debug.RansacLines.leftLine.valid;
     entry.rightValid = debug.RansacLines.rightLine.valid;
     
     entry.lWaypoint = debug.lWaypoint;
-    entry.gWaypoint = debug.gWaypoint;
+    entry.gWaypoint = debug.gWaypoint[debug.currentWaypointIndex];
 
     buffer.push_back(entry);
 
@@ -68,9 +71,11 @@ void Logger::Flush() {
     for (const auto& e : buffer) {
         file << e.timestamp << "," << e.x << "," << e.y << "," << e.theta << ","
              << e.leftPWM << "," << e.rightPWM << ","
+             << e.row.leftLine.m << "," << e.row.rightLine.m << ","
              << e.leftDistance << "," << e.rightDistance << ","
              << e.lineDifference << "," << e.state << ","
              << e.leftValid << "," << e.rightValid << ","
+             << e.EORLine.m << "," << e.EORLine.b << ","
              << e.lWaypoint.x << "," << e.lWaypoint.y <<  ","
              << e.gWaypoint.x << "," << e.gWaypoint.y << "\n";
     }

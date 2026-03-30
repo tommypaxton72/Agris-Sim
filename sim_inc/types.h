@@ -1,6 +1,14 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+/*
+====================== Types ========================
+
+This file contains the types used throughout the sim
+
+
+*/
+
 #include <vector>
 
 struct Obstacle {

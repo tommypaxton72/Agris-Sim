@@ -57,6 +57,15 @@ bool Perception::CheckCollision() {
     return false;
 }
 
+// After Ransac is set, save the average line difference
+void Perception::UpdateRowDistance() {
+    if (rowBuffer[1].leftLine.valid && rowBuffer[1].rightLine.valid) {
+        float newDistance = rowBuffer[1].rightLine.b - rowBuffer[1].leftLine.b;
+        avgRowDistance = (avgRowDistance * 0.95f) + (newDistance * 0.05f);
+    }
+}
+
+// With the given LidarData, update RansacLines
 void Perception::UpdateRANSAC() {
     
     Row testRow  = ransac.RunRansac(lidarData);
@@ -78,8 +87,7 @@ void Perception::UpdateRANSAC() {
     }
     rowBuffer[0] = rowBuffer[1]; // Row buffer[0] = Old Data
     rowBuffer[1] = testRow;      // Row buffer[1] = New Data
-    
-
+    UpdateRowDistance();
 }
 
 // make waypoint if both ransac lines are done.
@@ -115,6 +123,50 @@ void Perception::GenerateWaypoint() {
     }
 }
 
+
+
+// Sorts and holds the closest n number of lidar points and returns them
+void Perception::SetLidarEndOfRow(uint16_t n) {
+    LidarData result;
+
+    for (uint16_t i = 0; i < lidarData.count; i++) {
+        LidarPoint& p = lidarData.points[i];
+        if (p.angle <= 135.0f || p.angle >= 225.0f || p.quality <= MINIMUM_LIDAR_QUALITY)
+            continue;
+
+        // Find sorted insert position
+        uint16_t insertAt = result.count;
+        for (uint16_t j = 0; j < result.count; j++) {
+            if (p.distance < result.points[j].distance) {
+                insertAt = j;
+                break;
+            }
+        }
+
+        if (insertAt < n) {
+            uint16_t end = (result.count < n - 1) ? result.count : n - 1;
+            for (uint16_t j = end; j > insertAt; j--)
+                result.points[j] = result.points[j - 1];
+            result.points[insertAt] = p;
+            if (result.count < n) result.count++;
+        }
+    }
+
+    endofRowLidar = result;
+}
+
+void Perception::SetEndOfRowLine() {
+    ransacLineEOR = ransac.EndOfRowRansac(endofRowLidar);
+}
+
+// Lots of different ways to determine the End of Row waypoint.
+// Use old ransac lines to generate new waypoint
+// Use old waypoint and add a distance to the y to get new waypoint.
+void Perception::SetEORWaypoint() {
+    waypointEOR.x = localWaypoint.x;
+    waypointEOR.y = localWaypoint.y + 200;
+
+}
 /* End of Row Detection
 There has to be a better way that knows the end of the row.
 This method lets robot keep going forward for a while before it figures it out
@@ -128,7 +180,7 @@ using values as enum
 uint8_t Perception::CheckRows() {
     uint16_t rightHit = 0;
     uint16_t leftHit = 0;
-    for (uint16_t i = 0; i < MAX_LIDAR_POINTS; i++) {
+    for (uint16_t i = 0; i < lidarData.count; i++) {
         // These angles are hard coded might change that later
         if (lidarData.points[i].angle > 90 && lidarData.points[i].angle <120 && 
             lidarData.points[i].quality > 5 && lidarData.points[i].distance < 750.0f) {
@@ -138,12 +190,17 @@ uint8_t Perception::CheckRows() {
             lidarData.points[i].quality > 5 && lidarData.points[i].distance < 750.0f) {
             leftHit++;
         };
-    } // These minimums are also hardcoded
+    }
     if (rightHit >= NUM_OF_HITS && leftHit >= NUM_OF_HITS) { return 0; };
     if (rightHit < NUM_OF_HITS && leftHit > NUM_OF_HITS) { return 1; };
     if (rightHit > NUM_OF_HITS && leftHit < NUM_OF_HITS) { return 2; };
     if (rightHit < NUM_OF_HITS && leftHit < NUM_OF_HITS) { return 3; };
     return 5; // return Error
+}
+
+// Clears end of row ransac line
+void Perception::ClearEOR() {
+    ransacLineEOR = {0, 0, 0, false};
 }
 
 void Perception::Reset() {
